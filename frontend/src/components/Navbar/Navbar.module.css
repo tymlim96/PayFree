@@ -1,0 +1,95 @@
+.navbar {
+  display: flex;
+  flex-wrap: wrap; /* allow wrap on small screens */
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: #007bff; /* bar color */
+  color: #fff;
+}
+
+/* Brand */
+.brandLink {
+  font-weight: 800;
+  font-size: clamp(1.6rem, 3.2vw, 2.2rem);
+  color: #fff8e1;
+  text-decoration: none;
+}
+.brandLink:visited,
+.brandLink:hover,
+.brandLink:active,
+.brandLink:focus {
+  color: #fff8e1;
+  text-decoration: none;
+}
+
+/* Right-side actions (links + logout) */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem; /* spacing between Account / Logout etc. */
+}
+
+/* Nav links */
+.navLink {
+  display: inline-block; /* so padding applies nicely */
+  font-size: clamp(1.2rem, 2.6vw, 1.5rem);
+  padding: 0.6rem 0.95rem;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  border-radius: 4px;
+}
+.navLink:hover,
+.navLink:focus {
+  text-decoration: underline;
+}
+.navLink:focus-visible {
+  outline: 2px solid #fff8e1; /* accessible focus ring */
+  outline-offset: 2px;
+}
+
+/* Logout button: same font as links, slimmer width */
+.logoutButton {
+  font-size: clamp(1.2rem, 2.6vw, 1.5rem);
+  font-weight: 700;
+  padding: 0.35rem 0.6rem; /* tighter left/right */
+  width: auto; /* no stretching */
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  line-height: 1.1;
+  min-height: 44px;
+
+  background: #fff;
+  color: #007bff;
+  border: 1px solid #d6e4ff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.logoutButton:focus-visible {
+  outline: 2px solid #fff8e1;
+  outline-offset: 2px;
+}
+
+/* Small-screen tweaks */
+@media (max-width: 520px) {
+  .navbar {
+    padding: 0.75rem;
+  }
+
+  .actions {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.5rem; /* a bit tighter on small screens */
+  }
+
+  .navLink,
+  .logoutButton {
+    padding: 0.6rem 0.8rem; /* keep tap targets comfy */
+    min-height: 40px;
+  }
+}

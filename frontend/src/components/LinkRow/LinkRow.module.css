@@ -1,0 +1,37 @@
+/* centered single link row */
+.linkRow {
+  text-align: center;
+  margin-top: 0.75rem;
+}
+
+.link {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 600;
+}
+.link:hover,
+.link:focus {
+  text-decoration: underline;
+}
+
+/* split row (left + right) */
+.splitRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  flex-wrap: nowrap; /* keep on one line */
+}
+
+.splitItem a {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 600;
+  white-space: nowrap; /* avoid wrapping each link */
+  font-size: clamp(0.95rem, 2.8vw, 1rem);
+}
+.splitItem a:hover,
+.splitItem a:focus {
+  text-decoration: underline;
+}

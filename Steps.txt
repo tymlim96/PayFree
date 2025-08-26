@@ -1,0 +1,18 @@
+Steps
+
+-----Backend----
+npm init -y
+npm install bcrypt cookie-parser cors dotenv express google-auth-library jsonwebtoken nodemailer pg
+
+db.js
+
+routes/auth.js:
+- express router
+- get/post/put/delete methods
+
+server.js:
+- dotenv.config()
+- const app = express()
+- cors to allow different ports (frontend and backend)
+- express.json() parser
+- mount on '/auth' the auth routes (from routes/auth.js)

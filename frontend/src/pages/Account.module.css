@@ -1,0 +1,148 @@
+/* Page wrapper */
+.container {
+  max-width: 720px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+/* Simple card */
+.card {
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  padding: 1.25rem;
+}
+
+/* Rows */
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap; /* handle long values on small screens */
+  gap: 1rem;
+  padding: 0.8rem 0;
+}
+.row + .row {
+  border-top: 1px solid #f0f2f5;
+}
+
+/* Left / right */
+.label {
+  font-weight: 600;
+  color: #555;
+  flex: 0 0 auto;
+  min-width: 120px; /* consistent alignment */
+}
+.value {
+  color: #333;
+  flex: 1 1 auto;
+  word-break: break-word; /* long emails/names */
+  overflow-wrap: anywhere;
+}
+
+/* Right-side actions */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 0 0 auto;
+}
+
+/* --- Buttons (primary by default) --- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 0.9rem;
+  font-size: clamp(1rem, 1.8vw, 1.1rem);
+  line-height: 1;
+  min-height: 44px;
+  border-radius: 8px;
+  border: 1px solid #007bff;
+  background: #007bff;
+  color: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 120ms ease, border-color 120ms ease;
+  font-weight: 600;
+}
+.btn:hover {
+  background: #005ed1;
+}
+.btn:focus-visible {
+  outline: 2px solid #80bfff; /* visible keyboard focus */
+  outline-offset: 2px;
+}
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Grey "Cancel" (combine with .btn) */
+.cancelButton {
+  background: #e0e0e0;
+  color: #333;
+  border: 1px solid #d0d0d0;
+  font-weight: 600;
+}
+.cancelButton:hover {
+  background: #cfcfcf;
+}
+.cancelButton:focus-visible {
+  outline: 2px solid #bdbdbd;
+  outline-offset: 2px;
+}
+
+/* Inline edit area (Full Name) */
+.editRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  width: 100%;
+}
+
+/* Edit input (not inside a <form>) */
+.editField {
+  width: 100%;
+  max-width: 360px;
+  margin-left: auto;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #cfd8dc;
+  border-radius: 6px;
+  font-size: 1.05rem;
+  min-height: 44px;
+}
+.editField:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.12);
+}
+
+/* Save/Cancel under the input */
+.editActions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+/* Responsive tweaks */
+@media (max-width: 480px) {
+  .row {
+    align-items: flex-start;
+  }
+  .actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .editRight {
+    align-items: stretch;
+  }
+  .editField {
+    margin-left: 0;
+    max-width: 100%;
+  }
+  .editActions {
+    justify-content: flex-start;
+  }
+}
