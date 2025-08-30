@@ -33,3 +33,6 @@ frontend/.pnp.js
 .DS_Store
 Thumbs.db
 .vscode/
+
+# Personal notes
+*.txt

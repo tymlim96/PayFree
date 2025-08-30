@@ -1,32 +1,35 @@
-// server.js
+// backend/server.js
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-import pool from "./db.js";
+import dotenv from "dotenv";
 import authRoutes from "./routes/auth.js";
+import tripsRouter from "./routes/trips.js";
+import requireAuth from "./middleware/requireAuth.js";
 
-dotenv.config(); // loads DB_PORT, DB_*, JWT_SECRET
+dotenv.config();
 
 const app = express();
-const DB_PORT = process.env.DB_PORT || 5000;
 
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
+
+// Health check
+app.get("/", (_req, res) => res.json({ ok: true }));
+
+// Auth routes (login/signup/me/password reset/etc.)
 app.use("/auth", authRoutes);
 
-async function start() {
-  try {
-    await pool.query("SELECT NOW()");
-    console.log("PostgreSQL connected");
-    app.listen(DB_PORT, () =>
-      console.log(`Server running on http://localhost:${DB_PORT}`)
-    );
-  } catch (err) {
-    console.error("DB connect failed:", err);
-    process.exit(1);
-  }
-}
+// Trips
+app.use("/trips", requireAuth, tripsRouter);
 
-start();
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`[backend] listening on http://localhost:${PORT}`);
+});

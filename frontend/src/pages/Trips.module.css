@@ -1,0 +1,107 @@
+/* Page wrapper */
+.container {
+  max-width: 720px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+/* Header row: title + button on the same line */
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* vertically align */
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+/* Left-aligned title */
+.title {
+  text-align: left;
+  color: #333;
+  margin: 0; /* remove extra spacing so it centers nicely vertically */
+}
+
+/* --- Primary button (same as Account .btn) --- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 0.9rem;
+  font-size: clamp(1rem, 1.8vw, 1.1rem);
+  line-height: 1;
+  min-height: 44px;
+  border-radius: 8px;
+  border: 1px solid #007bff;
+  background: #007bff;
+  color: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+  font-weight: 600;
+}
+.btn:hover {
+  background: #005ed1;
+}
+.newTripBtn {
+  background: #e67e22; /* darker orange base */
+  border-color: #e67e22;
+  color: #fff;
+}
+.newTripBtn:hover {
+  background: #ca6f1e; /* deeper burnt orange on hover */
+  border-color: #ca6f1e;
+}
+
+/* Trip list */
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+/* Trip list */
+.item {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: #fff8f0; /* very light orange background */
+  border: 1px solid #ffe0b3; /* soft orange border */
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+  margin-bottom: 0.75rem;
+  transition: background 0.2s, border-color 0.2s;
+}
+.item:hover {
+  background: #fff3e0; /* slightly deeper on hover */
+  border-color: #ffc966; /* stronger orange border on hover */
+}
+.itemName {
+  font-weight: 600;
+  color: #333;
+}
+.itemMeta {
+  color: #666;
+}
+
+/* States */
+.error {
+  text-align: center;
+  color: #d32f2f;
+}
+.empty {
+  text-align: center;
+  color: #555;
+}
+
+/* Small screens */
+@media (max-width: 480px) {
+  .container {
+    padding: 0 0.75rem;
+  }
+  .item {
+    padding: 0.8rem 0.9rem;
+  }
+}
+
+/* push the bottom nav link down */
+.bottomNav {
+  margin-top: 3rem;
+}

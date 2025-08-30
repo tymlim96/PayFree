@@ -20,7 +20,7 @@ export default function SignUp() {
 
   useEffect(() => {
     if (isLoggedIn) {
-      navigate("/home");
+      navigate("/trips");
     }
   }, [isLoggedIn, navigate]);
 

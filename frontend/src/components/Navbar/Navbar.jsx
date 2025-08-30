@@ -14,13 +14,16 @@ export default function Navbar() {
 
   return (
     <nav className={styles.navbar}>
-      <Link to="/home" className={styles.brandLink}>
+      <Link to="/trips" className={styles.brandLink}>
         PayFree
       </Link>
 
       <div className={styles.actions}>
         {isLoggedIn ? (
           <>
+            <Link to="/trips" className={styles.navLink}>
+              Trips
+            </Link>
             <Link to="/account" className={styles.navLink}>
               Account
             </Link>
@@ -34,7 +37,7 @@ export default function Navbar() {
               Login
             </Link>
             <Link to="/signup" className={styles.navLink}>
-              Sign up
+              Sign Up
             </Link>
           </>
         )}

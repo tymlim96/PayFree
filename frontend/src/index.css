@@ -124,3 +124,19 @@ form button:disabled {
     font-size: 1.25rem;
   }
 }
+
+/* Prevent number inputs from changing on mouse wheel scroll */
+input[type="number"] {
+  -moz-appearance: textfield; /* already used to hide arrows in Firefox */
+}
+
+input[type="number"]:focus {
+  outline: none;
+}
+
+/* optional: ensure wheel scroll doesn’t increment/decrement */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

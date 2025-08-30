@@ -17,11 +17,11 @@ export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  // Redirect to Home if already logged in
+  // Redirect to Trips if already logged in
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      navigate("/home");
+      navigate("/trips");
     }
   }, [navigate]);
 
@@ -46,7 +46,7 @@ export default function Login() {
       await login(res.data.token);
       setMsg("Logged in successfully");
       setStatus("success");
-      navigate("/home");
+      navigate("/trips");
     } catch (err) {
       setMsg(err.response?.data?.error || "Login failed");
       setStatus("error");

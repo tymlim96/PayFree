@@ -19,7 +19,7 @@ export default function OAuthCallback() {
       }
       try {
         await login(token); // stores token, fetches /auth/me
-        navigate("/home", { replace: true });
+        navigate("/trips", { replace: true });
       } catch {
         navigate("/login", { replace: true, state: { msg: "OAuth failed" } });
       }

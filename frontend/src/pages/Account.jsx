@@ -129,7 +129,7 @@ export default function Account() {
         </div>
       </div>
 
-      <LinkRow to="/home">← Back to Home</LinkRow>
+      <LinkRow to="/trips">← Back to Trips</LinkRow>
     </div>
   );
 }
