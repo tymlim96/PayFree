@@ -238,6 +238,64 @@
   color: #666;
 }
 
+/* ===== Settlements section ===== */
+.settlementsSection {
+  margin-top: 1.25rem;
+}
+
+.settlementsHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.settlementsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.settlementItem {
+  margin-bottom: 0.6rem;
+}
+
+.settlementCard {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.settlementCard:hover {
+  background: #f3f4f6;
+}
+
+.settlementRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.settlementParties {
+  color: #1f2937;
+}
+
+.settlementAmt {
+  font-weight: 700;
+  color: #111827;
+}
+
+.settlementMeta {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
 /* ===== Delete confirm block ===== */
 .deleteSection {
   margin-top: 1.25rem;

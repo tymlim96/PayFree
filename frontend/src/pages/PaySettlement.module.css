@@ -1,0 +1,147 @@
+.container {
+  max-width: 720px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+.title {
+  margin: 0 0 0.75rem 0;
+  color: #333;
+  text-align: left;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 2px 10px rgba(16, 24, 40, 0.04);
+}
+
+.summary {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+.owe {
+  color: #b02a37;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.form {
+  margin-top: 0.5rem;
+}
+.label {
+  display: block;
+  font-size: 0.95rem;
+  color: #333;
+  margin-bottom: 0.35rem;
+}
+.input {
+  width: 100%;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+}
+.input:focus {
+  outline: none;
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.helpers {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.25rem 0 0.75rem 0;
+}
+.hint {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 0.9rem;
+  font-size: clamp(1rem, 1.8vw, 1.1rem);
+  line-height: 1;
+  min-height: 44px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.payBtn {
+  background: #d35400; /* darker orange for better contrast */
+  border-color: #d35400;
+  color: #fff;
+  width: 100%;
+}
+.payBtn:hover {
+  background: #a84300; /* deeper orange on hover */
+  border-color: #a84300;
+}
+
+.secondaryBtn {
+  background: #f8f9fa;
+  border: 1px solid #ced4da;
+  color: #333;
+}
+.secondaryBtn:hover {
+  background: #e9ecef;
+}
+
+.confirmCard {
+  border: 1px solid #ffe5e7;
+  background: #fff5f6;
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+.confirmText {
+  margin: 0 0 0.5rem 0;
+  color: #5c0a11;
+}
+.confirmRow {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  flex-wrap: wrap; /* ✅ keep buttons inside on small screens */
+}
+.confirmRow .btn {
+  flex: 1 1 auto; /* ✅ allow shrinking/stacking */
+  min-width: 120px;
+}
+
+.center {
+  text-align: center;
+  color: #555;
+}
+.error {
+  color: #d32f2f;
+}
+.emptyCard {
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+  color: #666;
+}
+.bottomNav {
+  margin-top: 2rem;
+}
+
+@media (max-width: 520px) {
+  .confirmRow .btn {
+    flex: 1 1 100%;
+  }
+}

@@ -559,25 +559,31 @@ router.get("/:id/expenses", async (req, res) => {
 
 /*──────────────────────────────────────────────────────────────
   GET /trips/:id/my-balance
-  Your net debt for this trip.
+  Your net debt for this trip, including settlements and
+  per-counterparty netting (consistent with /ledger).
+
   Returns: { balance_cents, currency_code }
-  balance_cents = sum(shares you owe) - sum(expenses you paid)
   Positive => you owe others; Negative => others owe you
 ──────────────────────────────────────────────────────────────*/
 router.get("/:id/my-balance", async (req, res) => {
-  try {
-    const { id: tripId } = req.params;
+  const tripId = Number(req.params.id);
+  const me = req.userId;
 
-    // must be a member
+  if (!Number.isFinite(tripId)) {
+    return res.status(400).json({ error: "Invalid trip id" });
+  }
+
+  try {
+    // Must be a member
     const access = await pool.query(
       `SELECT 1 FROM trip_members WHERE trip_id = $1 AND user_id = $2`,
-      [tripId, req.userId]
+      [tripId, me]
     );
     if (access.rowCount === 0) {
       return res.status(403).json({ error: "No access" });
     }
 
-    // trip currency (for display)
+    // Trip currency
     const t = await pool.query(
       `SELECT currency_code FROM trips WHERE id = $1`,
       [tripId]
@@ -587,31 +593,100 @@ router.get("/:id/my-balance", async (req, res) => {
     }
     const currency_code = t.rows[0].currency_code;
 
-    // total you owe (sum of your shares)
-    const owedQ = await pool.query(
+    // Debts from expenses: I participated; someone else paid => I owe them my share
+    const debtsQ = await pool.query(
       `
-      SELECT COALESCE(SUM(es.share_cents), 0)::int AS owed
+      SELECT
+        e.paid_by_user_id            AS user_id,
+        SUM(es.share_cents)::bigint  AS amount_cents
       FROM expense_shares es
       JOIN expenses e ON e.id = es.expense_id
-      WHERE e.trip_id = $1 AND es.user_id = $2
+      WHERE e.trip_id = $1
+        AND es.user_id = $2
+        AND e.paid_by_user_id <> $2
+      GROUP BY e.paid_by_user_id
       `,
-      [tripId, req.userId]
+      [tripId, me]
     );
-    const owed = owedQ.rows[0].owed || 0;
 
-    // total you paid
-    const paidQ = await pool.query(
+    // Credits from expenses: I paid; others participated => they owe me their shares
+    const creditsQ = await pool.query(
       `
-      SELECT COALESCE(SUM(e.amount_cents), 0)::int AS paid
+      SELECT
+        es.user_id                   AS user_id,
+        SUM(es.share_cents)::bigint  AS amount_cents
       FROM expenses e
-      WHERE e.trip_id = $1 AND e.paid_by_user_id = $2
+      JOIN expense_shares es ON es.expense_id = e.id
+      WHERE e.trip_id = $1
+        AND e.paid_by_user_id = $2
+        AND es.user_id <> $2
+      GROUP BY es.user_id
       `,
-      [tripId, req.userId]
+      [tripId, me]
     );
-    const paid = paidQ.rows[0].paid || 0;
 
-    const balance_cents = owed - paid; // +ve you owe; -ve others owe you
+    // Settlements: I paid others (reduces my debts to them)
+    const settIPaidQ = await pool.query(
+      `
+      SELECT to_user_id AS user_id, SUM(amount_cents)::bigint AS paid_cents
+      FROM settlements
+      WHERE trip_id = $1 AND from_user_id = $2
+      GROUP BY to_user_id
+      `,
+      [tripId, me]
+    );
 
+    // Settlements: others paid me (reduces their credits owed to me)
+    const settPaidToMeQ = await pool.query(
+      `
+      SELECT from_user_id AS user_id, SUM(amount_cents)::bigint AS paid_cents
+      FROM settlements
+      WHERE trip_id = $1 AND to_user_id = $2
+      GROUP BY from_user_id
+      `,
+      [tripId, me]
+    );
+
+    // Index settlements
+    const paidByMe = new Map(); // user_id -> cents I paid them
+    const paidToMe = new Map(); // user_id -> cents they paid me
+    for (const r of settIPaidQ.rows)
+      paidByMe.set(r.user_id, Number(r.paid_cents));
+    for (const r of settPaidToMeQ.rows)
+      paidToMe.set(r.user_id, Number(r.paid_cents));
+
+    // Build maps AFTER subtracting settlements, clamped at 0 per counterparty
+    const debtsMap = new Map(); // I owe them
+    for (const r of debtsQ.rows) {
+      const base = Number(r.amount_cents);
+      const reduce = paidByMe.get(r.user_id) || 0;
+      const remaining = Math.max(0, base - reduce);
+      if (remaining > 0) debtsMap.set(r.user_id, remaining);
+    }
+
+    const creditsMap = new Map(); // they owe me
+    for (const r of creditsQ.rows) {
+      const base = Number(r.amount_cents);
+      const reduce = paidToMe.get(r.user_id) || 0;
+      const remaining = Math.max(0, base - reduce);
+      if (remaining > 0) creditsMap.set(r.user_id, remaining);
+    }
+
+    // Net per counterparty -> totals
+    let totalDebts = 0; // sum of amounts I owe (post-settlement, post-net)
+    let totalCredits = 0; // sum of amounts they owe me (post-settlement, post-net)
+
+    const allIds = new Set([...debtsMap.keys(), ...creditsMap.keys()]);
+    for (const uid of allIds) {
+      const d = debtsMap.get(uid) || 0;
+      const c = creditsMap.get(uid) || 0;
+      const net = c - d; // positive => they owe me; negative => I owe them
+      if (net > 0) totalCredits += net;
+      else if (net < 0) totalDebts += -net;
+      // net == 0 => fully settled with this user
+    }
+
+    const balance_cents = totalDebts - totalCredits; // +ve you owe; -ve others owe you
     return res.json({ balance_cents, currency_code });
   } catch (err) {
     console.error("[TRIPS] MY BALANCE ERROR:", err);
@@ -730,12 +805,203 @@ router.delete("/:id/expenses/:expenseId", async (req, res) => {
 });
 
 /*──────────────────────────────────────────────────────────────
+  GET /trips/:id/ledger
+  Returns per-counterparty NET amounts, split into:
+  - debts  (you owe them)
+  - credits (they owe you)
+  Logic: net = credits_to_me - debts_to_them
+──────────────────────────────────────────────────────────────*/
+router.get("/:id/ledger", async (req, res) => {
+  const tripId = Number(req.params.id);
+  const me = req.userId;
+
+  if (!Number.isFinite(tripId)) {
+    return res.status(400).json({ error: "Invalid trip id" });
+  }
+
+  try {
+    // 1) Ensure requester is a member of the trip (authorization)
+    const mem = await pool.query(
+      `
+      SELECT 1
+      FROM trip_members
+      WHERE trip_id = $1 AND user_id = $2
+      LIMIT 1
+      `,
+      [tripId, me]
+    );
+    if (mem.rowCount === 0) {
+      return res.status(403).json({ error: "Not a member of this trip" });
+    }
+
+    // 2) Get trip currency for display
+    const tripRow = await pool.query(
+      `SELECT currency_code FROM trips WHERE id = $1`,
+      [tripId]
+    );
+    if (tripRow.rowCount === 0) {
+      return res.status(404).json({ error: "Trip not found" });
+    }
+    const currencyCode = tripRow.rows[0].currency_code;
+
+    // 3) Debts from expenses: I participated; someone else paid
+    //    => I owe the payer my share
+    const debtsQ = await pool.query(
+      `
+      SELECT
+        e.paid_by_user_id            AS user_id,
+        COALESCE(u.full_name, '')    AS full_name,
+        SUM(es.share_cents)::bigint  AS amount_cents
+      FROM expense_shares es
+      JOIN expenses e ON e.id = es.expense_id
+      JOIN users u    ON u.id = e.paid_by_user_id
+      WHERE e.trip_id = $1
+        AND es.user_id = $2        -- me as participant
+        AND e.paid_by_user_id <> $2
+      GROUP BY e.paid_by_user_id, u.full_name
+      `,
+      [tripId, me]
+    );
+
+    // 4) Credits from expenses: I paid; others participated
+    //    => Others owe me their shares
+    const creditsQ = await pool.query(
+      `
+      SELECT
+        es.user_id                   AS user_id,
+        COALESCE(u.full_name, '')    AS full_name,
+        SUM(es.share_cents)::bigint  AS amount_cents
+      FROM expenses e
+      JOIN expense_shares es ON es.expense_id = e.id
+      JOIN users u          ON u.id = es.user_id
+      WHERE e.trip_id = $1
+        AND e.paid_by_user_id = $2  -- me as payer
+        AND es.user_id <> $2
+      GROUP BY es.user_id, u.full_name
+      `,
+      [tripId, me]
+    );
+
+    // 5) Settlements I paid to others (reduce my debts to them)
+    const settIPaidQ = await pool.query(
+      `
+      SELECT
+        to_user_id                AS user_id,
+        SUM(amount_cents)::bigint AS paid_cents
+      FROM settlements
+      WHERE trip_id = $1
+        AND from_user_id = $2
+      GROUP BY to_user_id
+      `,
+      [tripId, me]
+    );
+
+    // 6) Settlements others paid to me (reduce their credits owed to me)
+    const settPaidToMeQ = await pool.query(
+      `
+      SELECT
+        from_user_id              AS user_id,
+        SUM(amount_cents)::bigint AS paid_cents
+      FROM settlements
+      WHERE trip_id = $1
+        AND to_user_id = $2
+      GROUP BY from_user_id
+      `,
+      [tripId, me]
+    );
+
+    // Index settlements for quick lookups
+    const paidByMe = new Map(); // user_id -> cents I paid them (reduces my debts)
+    const paidToMe = new Map(); // user_id -> cents they paid me (reduces their credits)
+    for (const r of settIPaidQ.rows)
+      paidByMe.set(r.user_id, Number(r.paid_cents));
+    for (const r of settPaidToMeQ.rows)
+      paidToMe.set(r.user_id, Number(r.paid_cents));
+
+    // Build maps { user_id -> { name, amount_cents } } AFTER settlements
+    const debtsMap = new Map(); // what I owe them, after subtracting what I already paid
+    for (const r of debtsQ.rows) {
+      const base = Number(r.amount_cents);
+      const reduce = paidByMe.get(r.user_id) || 0;
+      const remaining = Math.max(0, base - reduce);
+      if (remaining > 0) {
+        debtsMap.set(r.user_id, {
+          full_name: r.full_name || null,
+          cents: remaining,
+        });
+      }
+    }
+
+    const creditsMap = new Map(); // what they owe me, after subtracting what they already paid me
+    for (const r of creditsQ.rows) {
+      const base = Number(r.amount_cents);
+      const reduce = paidToMe.get(r.user_id) || 0;
+      const remaining = Math.max(0, base - reduce);
+      if (remaining > 0) {
+        creditsMap.set(r.user_id, {
+          full_name: r.full_name || null,
+          cents: remaining,
+        });
+      }
+    }
+
+    // NET per counterparty: credits - debts
+    const allIds = new Set([...debtsMap.keys(), ...creditsMap.keys()]);
+    const debts = [];
+    const credits = [];
+
+    for (const uid of allIds) {
+      const d = debtsMap.get(uid)?.cents || 0;
+      const c = creditsMap.get(uid)?.cents || 0;
+      const name =
+        (creditsMap.get(uid)?.full_name ?? debtsMap.get(uid)?.full_name) ||
+        null;
+
+      const net = c - d; // positive => they owe me; negative => I owe them
+      if (net > 0) {
+        credits.push({ user_id: uid, full_name: name, amount_cents: net });
+      } else if (net < 0) {
+        debts.push({ user_id: uid, full_name: name, amount_cents: -net });
+      }
+      // net == 0 => omit (fully settled)
+    }
+
+    // Sort biggest first
+    debts.sort((a, b) => b.amount_cents - a.amount_cents);
+    credits.sort((a, b) => b.amount_cents - a.amount_cents);
+
+    return res.json({
+      currency_code: currencyCode,
+      debts,
+      credits,
+    });
+  } catch (e) {
+    console.error("GET /trips/:id/ledger error:", e);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
+
+/*──────────────────────────────────────────────────────────────
   GET /trips/:id/settlements
   Get all settlements for a trip (visible to members)
 ──────────────────────────────────────────────────────────────*/
 router.get("/:id/settlements", async (req, res) => {
-  const { id } = req.params;
+  const tripId = Number(req.params.id);
+
+  if (!Number.isFinite(tripId)) {
+    return res.status(400).json({ error: "Invalid trip id" });
+  }
+
   try {
+    // requester must be a member
+    const access = await pool.query(
+      `SELECT 1 FROM trip_members WHERE trip_id = $1 AND user_id = $2`,
+      [tripId, req.userId]
+    );
+    if (access.rowCount === 0) {
+      return res.status(403).json({ error: "No access" });
+    }
+
     const q = await pool.query(
       `
       SELECT 
@@ -754,13 +1020,153 @@ router.get("/:id/settlements", async (req, res) => {
       WHERE s.trip_id = $1
       ORDER BY s.created_at DESC
       `,
-      [id]
+      [tripId]
     );
 
     return res.json({ settlements: q.rows });
   } catch (e) {
-    console.error("Failed to fetch settlements", e);
+    console.error("[TRIPS] LIST SETTLEMENTS ERROR:", e);
     return res.status(500).json({ error: "Failed to fetch settlements" });
+  }
+});
+
+/*──────────────────────────────────────────────────────────────
+  POST /trips/:id/settlements
+  Records a settlement (payment) from the current user (from_user_id)
+  to another member (to_user_id) within the same trip.
+
+  Validations:
+    - Both users must be members of the trip
+    - Cannot settle with yourself
+    - Amount must be > 0 and not exceed current outstanding debt
+──────────────────────────────────────────────────────────────*/
+router.post("/:id/settlements", async (req, res) => {
+  const tripId = Number(req.params.id);
+  const me = req.userId;
+  const { to_user_id, amount_cents } = req.body || {};
+
+  if (!Number.isFinite(tripId)) {
+    return res.status(400).json({ error: "Invalid trip id" });
+  }
+  const toUserId = Number(to_user_id);
+  const amt = Number(amount_cents);
+
+  if (!Number.isFinite(toUserId) || toUserId <= 0) {
+    return res.status(400).json({ error: "Invalid to_user_id" });
+  }
+  if (!Number.isFinite(amt) || amt <= 0) {
+    return res.status(400).json({ error: "Invalid amount_cents" });
+  }
+  if (toUserId === me) {
+    return res.status(400).json({ error: "Cannot settle with yourself" });
+  }
+
+  try {
+    // 1) Ensure both requester and counterparty are members of the trip
+    const mem = await pool.query(
+      `
+      SELECT user_id FROM trip_members
+      WHERE trip_id = $1 AND user_id IN ($2, $3)
+      `,
+      [tripId, me, toUserId]
+    );
+    const members = new Set(mem.rows.map((r) => Number(r.user_id)));
+    if (!members.has(me) || !members.has(toUserId)) {
+      return res.status(403).json({ error: "Both users must be trip members" });
+    }
+
+    // 2) Get trip currency
+    const t = await pool.query(
+      `SELECT currency_code FROM trips WHERE id = $1`,
+      [tripId]
+    );
+    if (t.rowCount === 0)
+      return res.status(404).json({ error: "Trip not found" });
+    const currencyCode = t.rows[0].currency_code;
+
+    // 3) (Optional but recommended) compute current net to prevent overpaying
+    //    We'll reuse your ledger logic by calling the same SQL pieces quickly
+    //    Get how much I currently owe 'toUserId' AFTER settlements (netted)
+    const netQ = await pool.query(
+      `
+      WITH debts AS (
+        -- I owe them
+        SELECT COALESCE(SUM(es.share_cents),0)::bigint AS cents
+        FROM expense_shares es
+        JOIN expenses e ON e.id = es.expense_id
+        WHERE e.trip_id = $1
+          AND es.user_id = $2      -- me as participant
+          AND e.paid_by_user_id = $3
+      ),
+      debts_after_settle AS (
+        SELECT GREATEST(
+          (SELECT cents FROM debts)
+          - COALESCE((
+              SELECT SUM(amount_cents) FROM settlements
+              WHERE trip_id = $1 AND from_user_id = $2 AND to_user_id = $3
+            ),0), 0
+        )::bigint AS cents
+      ),
+      credits AS (
+        -- They owe me
+        SELECT COALESCE(SUM(es.share_cents),0)::bigint AS cents
+        FROM expense_shares es
+        JOIN expenses e ON e.id = es.expense_id
+        WHERE e.trip_id = $1
+          AND e.paid_by_user_id = $2
+          AND es.user_id = $3
+      ),
+      credits_after_settle AS (
+        SELECT GREATEST(
+          (SELECT cents FROM credits)
+          - COALESCE((
+              SELECT SUM(amount_cents) FROM settlements
+              WHERE trip_id = $1 AND from_user_id = $3 AND to_user_id = $2
+            ),0), 0
+        )::bigint AS cents
+      )
+      SELECT
+        (SELECT cents FROM credits_after_settle) AS credits_to_me,
+        (SELECT cents FROM debts_after_settle)   AS debts_to_them
+      `,
+      [tripId, me, toUserId]
+    );
+
+    const { credits_to_me, debts_to_them } = netQ.rows[0];
+    const net = Number(credits_to_me) - Number(debts_to_them);
+    // If net >= 0 => they owe me; If net < 0 => I owe them (-net)
+    const iOweNow = net < 0 ? -net : 0;
+
+    if (iOweNow <= 0) {
+      return res
+        .status(400)
+        .json({ error: "No outstanding debt to this user" });
+    }
+    if (amt > iOweNow) {
+      return res.status(400).json({ error: "Amount exceeds outstanding debt" });
+    }
+
+    // 4) Insert settlement
+    const ins = await pool.query(
+      `
+      INSERT INTO settlements (trip_id, from_user_id, to_user_id, amount_cents, currency_code, created_by)
+      VALUES ($1, $2, $3, $4, $5, $2)
+      RETURNING id, trip_id, from_user_id, to_user_id, amount_cents, currency_code, created_at
+      `,
+      [tripId, me, toUserId, amt, currencyCode]
+    );
+
+    // 5) Return created row + updated ledger for convenience
+    //    You can skip this re-fetch if you prefer; frontend already navigates back.
+    //    But it's handy if you want to show a toast with new totals.
+    // minimal fetch: call your GET /ledger handler again if you want full consistency
+    return res.status(201).json({
+      settlement: ins.rows[0],
+      message: "Settlement recorded",
+    });
+  } catch (e) {
+    console.error("POST /trips/:id/settlements error:", e);
+    return res.status(500).json({ error: "Server error" });
   }
 });
 

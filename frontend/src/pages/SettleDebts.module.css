@@ -1,3 +1,4 @@
+/* ===== Layout ===== */
 .container {
   max-width: 720px;
   margin: 2rem auto;
@@ -5,75 +6,113 @@
 }
 
 .title {
-  margin: 0 0 1rem 0;
-  text-align: left;
+  margin: 0 0 0.75rem 0;
   color: #333;
+  text-align: left;
 }
 
-.actionsRow {
+/* ===== Sections ===== */
+.section {
+  margin-top: 1rem;
+}
+
+.sectionHead {
   display: flex;
-  justify-content: flex-end;
-  margin-bottom: 1rem;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.6rem 0.9rem;
-  font-size: clamp(1rem, 1.8vw, 1.1rem);
-  min-height: 44px;
-  border-radius: 8px;
-  border: 1px solid transparent;
-  font-weight: 600;
-  cursor: pointer;
+.sectionTitle {
+  margin: 0;
+  color: #1f2937;
+  text-align: left;
 }
 
-.newSettleBtn {
-  background: #d35400; /* darker orange for better contrast */
-  border-color: #d35400;
-  color: #fff;
-}
-.newSettleBtn:hover {
-  background: #a84300; /* deeper orange on hover */
-  border-color: #a84300;
+.totalDebt {
+  font-weight: 700;
+  color: #b02a37; /* match .amountOwe (red) */
 }
 
-.settlementList {
+.totalCredit {
+  font-weight: 700;
+  color: #1e7e34; /* match .amountGet (green) */
+}
+
+/* ===== Lists ===== */
+.list {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.settlementItem {
-  background: #fff8f0;
-  border: 1px solid #ffe0b3;
-  border-radius: 10px;
-  padding: 0.8rem 1rem;
-  margin-bottom: 0.75rem;
+.item {
+  margin-bottom: 0.6rem;
 }
 
-.settlementRow {
+/* Row base */
+.row {
+  width: 100%;
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: center;
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+  border: 1px solid transparent;
 }
 
-.amount {
+/* Clickable debts (orange accent, similar to your Trips list) */
+.debtRow {
+  background: #fff8f0; /* very light orange */
+  border: 1px solid #ffe0b3; /* soft orange border */
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.02s ease-in-out;
+}
+.debtRow:hover {
+  background: #fff3e0;
+  border-color: #ffc966;
+}
+.debtRow:active {
+  transform: scale(0.998);
+}
+
+/* Read-only credits (green accent like expenses) */
+.creditRow {
+  background: #f4fdf7; /* super light green */
+  border: 1px solid #d2f1dc; /* subtle green border */
+}
+
+/* Person block */
+.person {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.name {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 1.05rem;
+}
+
+/* Amounts */
+.amountOwe {
   font-weight: 700;
-  color: #111827;
+  color: #b02a37; /* red-ish: money leaving you */
+  font-size: 1.1rem;
+}
+.amountGet {
+  font-weight: 700;
+  color: #1e7e34; /* dark green: money coming in */
+  font-size: 1.1rem;
 }
 
-.meta {
-  color: #444;
-  font-size: 0.95rem;
+/* States */
+.center {
+  text-align: center;
+  color: #555;
 }
-
-.date {
-  font-size: 0.85rem;
-  color: #777;
-}
-
 .emptyCard {
   background: #fff;
   border: 1px solid #e9ecef;
@@ -82,12 +121,11 @@
   text-align: center;
   color: #666;
 }
-
 .error {
   color: #d32f2f;
-  text-align: center;
 }
 
+/* Spacing */
 .bottomNav {
   margin-top: 3rem;
 }

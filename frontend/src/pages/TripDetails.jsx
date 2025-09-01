@@ -48,6 +48,11 @@ export default function TripDetails() {
   const [loadingExp, setLoadingExp] = useState(true);
   const [expErr, setExpErr] = useState("");
 
+  // settlements state
+  const [settlements, setSettlements] = useState([]);
+  const [loadingSetts, setLoadingSetts] = useState(true);
+  const [settsErr, setSettsErr] = useState("");
+
   // balance state
   const [balance, setBalance] = useState(null); // in cents
   const [balanceCcy, setBalanceCcy] = useState("");
@@ -93,6 +98,29 @@ export default function TripDetails() {
     })();
   }, [id]);
 
+  // fetch settlements
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoadingSetts(true);
+        setSettsErr("");
+        const jwt = localStorage.getItem("token");
+        const res = await axios.get(
+          `http://localhost:5000/trips/${id}/settlements`,
+          { headers: { Authorization: `Bearer ${jwt}` } }
+        );
+        setSettlements(
+          Array.isArray(res.data?.settlements) ? res.data.settlements : []
+        );
+      } catch (e) {
+        setSettsErr(e?.response?.data?.error || "Failed to load settlements");
+      } finally {
+        setLoadingSetts(false);
+      }
+    })();
+  }, [id]);
+
+  // fetch balance
   useEffect(() => {
     (async () => {
       try {
@@ -335,6 +363,47 @@ export default function TripDetails() {
                     )}
                   </div>
                 </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* Settlements list */}
+      <div className={styles.settlementsSection}>
+        <div className={styles.settlementsHeaderRow}>
+          <h3 className={styles.subTitle}>Settlements</h3>
+        </div>
+
+        {loadingSetts ? (
+          <div className={styles.emptyCard}>Loading settlements…</div>
+        ) : settsErr ? (
+          <div className={styles.emptyCard}>{settsErr}</div>
+        ) : settlements.length === 0 ? (
+          <div className={styles.emptyCard}>No settlements recorded yet.</div>
+        ) : (
+          <ul className={styles.settlementsList}>
+            {settlements.map((s) => (
+              <li key={s.id} className={styles.settlementItem}>
+                <div className={styles.settlementCard}>
+                  <div className={styles.settlementRow}>
+                    <div className={styles.settlementParties}>
+                      <strong>
+                        {s.from_user_name || `User ${s.from_user_id}`}
+                      </strong>
+                      &nbsp;→&nbsp;
+                      <strong>
+                        {s.to_user_name || `User ${s.to_user_id}`}
+                      </strong>
+                    </div>
+                    <div className={styles.settlementAmt}>
+                      {(s.amount_cents / 100).toFixed(2)} {s.currency_code}
+                    </div>
+                  </div>
+                  <div className={styles.settlementMeta}>
+                    {new Date(s.created_at).toLocaleString()}
+                  </div>
+                </div>
               </li>
             ))}
           </ul>
