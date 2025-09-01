@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
 import axios from "axios";
 import styles from "./AuthForm.module.css";
 import Alert from "../components/Alert/Alert";
@@ -16,13 +15,6 @@ export default function SignUp() {
   const [msg, setMsg] = useState("");
   const [status, setStatus] = useState(null); // "success" | "error" | null
   const navigate = useNavigate();
-  const { isLoggedIn } = useAuth();
-
-  useEffect(() => {
-    if (isLoggedIn) {
-      navigate("/trips");
-    }
-  }, [isLoggedIn, navigate]);
 
   const isPasswordShort =
     password.length > 0 && password.length < minPasswordLen;
@@ -40,18 +32,18 @@ export default function SignUp() {
     e.preventDefault();
 
     // Check minimum length
-    if (isPasswordShort) {
-      setMsg(`Password must be at least ${minPasswordLen} characters`);
-      setStatus("error");
-      return;
-    }
+    // if (isPasswordShort) {
+    //   setMsg(`Password must be at least ${minPasswordLen} characters`);
+    //   setStatus("error");
+    //   return;
+    // }
 
     // Confirm passwords match
-    if (!passwordsMatch) {
-      setMsg("Password do not match");
-      setStatus("error");
-      return;
-    }
+    // if (!passwordsMatch) {
+    //   setMsg("Password do not match");
+    //   setStatus("error");
+    //   return;
+    // }
 
     // Sign up submit
     try {
@@ -128,6 +120,7 @@ export default function SignUp() {
             {passwordsMatch ? "Passwords match" : "Passwords do not match"}
           </Alert>
         )}
+        {/* Still needed in case of Signup error */}
         {msg && (
           <Alert type={status === "error" ? "error" : "success"}>{msg}</Alert>
         )}

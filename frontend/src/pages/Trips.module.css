@@ -42,13 +42,13 @@
   background: #005ed1;
 }
 .newTripBtn {
-  background: #e67e22; /* darker orange base */
-  border-color: #e67e22;
+  background: #d35400; /* darker orange for better contrast */
+  border-color: #d35400;
   color: #fff;
 }
 .newTripBtn:hover {
-  background: #ca6f1e; /* deeper burnt orange on hover */
-  border-color: #ca6f1e;
+  background: #a84300; /* deeper orange on hover */
+  border-color: #a84300;
 }
 
 /* Trip list */

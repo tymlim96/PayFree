@@ -10,17 +10,36 @@ import axios from "axios";
 const AuthContext = createContext();
 const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
 
+function base64UrlToJson(b64url) {
+  const b64 = b64url
+    .replace(/-/g, "+")
+    .replace(/_/g, "/")
+    .padEnd(b64url.length + ((4 - (b64url.length % 4)) % 4), "=");
+  return JSON.parse(atob(b64));
+}
+
 function decodeExpMs(token) {
   try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
+    const payload = base64UrlToJson(token.split(".")[1]);
     return payload?.exp ? payload.exp * 1000 : null;
   } catch {
     return null;
   }
 }
 
+// function decodeExpMs(token) {
+//   try {
+//     const payload = JSON.parse(atob(token.split(".")[1]));
+//     return payload?.exp ? payload.exp * 1000 : null;
+//   } catch {
+//     return null;
+//   }
+// }
+
 export function AuthProvider({ children }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    Boolean(localStorage.getItem("token"))
+  );
   const [fullName, setFullName] = useState("User");
   const [email, setEmail] = useState("");
   const [hasPassword, setHasPassword] = useState(false);

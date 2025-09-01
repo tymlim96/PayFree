@@ -1,4 +1,4 @@
-/* layout */
+/* ===== Layout ===== */
 .container {
   max-width: 720px;
   margin: 2rem auto;
@@ -21,7 +21,7 @@
   flex-wrap: wrap; /* stack buttons if narrow */
 }
 
-/* meta */
+/* ===== Meta (toggleable) ===== */
 .metaGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -41,7 +41,7 @@
   color: #333;
 }
 
-/* buttons */
+/* ===== Buttons ===== */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -98,7 +98,147 @@
   width: 100%;
 }
 
-/* delete confirm block */
+/* ===== Invite card ===== */
+.inviteCard {
+  margin: 0.75rem 0 0.5rem 0;
+  padding: 1rem;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 2px 10px rgba(16, 24, 40, 0.04);
+}
+.inviteHeader {
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 0.5rem 0;
+}
+.inviteRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fff8f0; /* light orange (matches Trips list) */
+  border: 1px dashed #ffc966; /* soft orange border */
+  border-radius: 10px;
+  padding: 0.65rem 0.75rem;
+}
+.inviteCode {
+  flex: 1;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.95rem;
+  color: #111827;
+  word-break: break-all;
+}
+.copyBtn {
+  border: 1px solid #007bff;
+  background: #007bff;
+  color: #fff;
+}
+.copyBtn:hover {
+  background: #005ed1;
+}
+.helper {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+  text-align: left; /* override global p center */
+}
+.settleBtn {
+  background: #d35400; /* darker orange for better contrast */
+  border-color: #d35400;
+  color: #fff;
+}
+.settleBtn:hover {
+  background: #a84300; /* deeper orange on hover */
+  border-color: #a84300;
+}
+
+/* ===== Expenses section ===== */
+.expensesSection {
+  margin-top: 1rem;
+}
+.expensesHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.subTitle {
+  margin: 0 0 0.5rem 0;
+  color: #1f2937;
+  text-align: left;
+}
+.expensesSummary {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  color: #444;
+}
+.summaryItem strong {
+  color: #111;
+}
+
+.expensesList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+/* The <li> becomes just a spacer */
+.expenseItem {
+  margin-bottom: 0.6rem;
+  list-style: none;
+}
+.expenseItem:hover {
+  background: #eaf8ef; /* slightly stronger green on hover */
+}
+.expenseMain {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+.expenseDesc {
+  font-weight: 600;
+  color: #1f2937;
+}
+.expenseAmt {
+  font-weight: 700;
+  color: #111827;
+}
+.expenseMeta {
+  margin-top: 0.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.5rem;
+  color: #6b7280;
+  font-size: 0.92rem;
+}
+/* Make the entire box the anchor */
+.expenseLink {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+
+  background: #f4fdf7; /* super light green */
+  border: 1px solid #d2f1dc; /* subtle green border */
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+}
+/* Hover effect on the full clickable area */
+.expenseLink:hover {
+  background: #eaf8ef; /* slightly stronger green on hover */
+}
+
+.emptyCard {
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+  color: #666;
+}
+
+/* ===== Delete confirm block ===== */
 .deleteSection {
   margin-top: 1.25rem;
 }
@@ -125,68 +265,11 @@
   justify-content: flex-end;
 }
 
-/* invite card */
-.inviteCard {
-  margin: 0.75rem 0 0.5rem 0;
-  padding: 1rem;
-  border: 1px solid #e9ecef;
-  border-radius: 12px;
-  background: #ffffff;
-  box-shadow: 0 2px 10px rgba(16, 24, 40, 0.04);
-}
-.inviteHeader {
-  font-weight: 700;
-  color: #1f2937;
-  margin: 0 0 0.5rem 0;
-}
-.inviteRow {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: #fff8f0; /* light orange background */
-  border: 1px dashed #ffc966; /* soft orange border */
-  border-radius: 10px;
-  padding: 0.65rem 0.75rem;
-}
-.inviteCode {
-  flex: 1;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.95rem;
-  color: #111827;
-  word-break: break-all;
-}
-.copyBtn {
-  border: 1px solid #007bff;
-  background: #007bff;
-  color: #fff;
-}
-.copyBtn:hover {
-  background: #005ed1;
-}
-.helper {
-  margin-top: 0.5rem;
-  font-size: 0.85rem;
-  color: #6b7280;
-  text-align: left; /* override global p center */
-}
-
-/* nav */
-.backBtn {
-  margin-bottom: 1rem;
-  background: none;
-  border: none;
-  color: #007bff;
-  font-size: 1rem;
-  cursor: pointer;
-}
-.backBtn:hover {
-  text-decoration: underline;
-}
+/* ===== Nav & states ===== */
 .bottomNav {
   margin-top: 3rem;
 }
 
-/* states */
 .error {
   color: #d32f2f;
 }
@@ -194,44 +277,17 @@
   color: #555;
 }
 
-/* Responsive niceties */
+/* Balance coloring: positive (you owe) = red; negative (others owe you) = green */
+.debtPositive strong {
+  color: #b02a37; /* red-ish */
+}
+.debtNegative strong {
+  color: #1e7e34; /* dark green */
+}
+
+/* ===== Responsive niceties ===== */
 @media (max-width: 520px) {
   .actionsRow {
     justify-content: flex-end;
   }
-}
-
-/* sub-title & section wrappers */
-.subTitle {
-  margin: 0 0 0.5rem 0;
-  color: #1f2937;
-  text-align: left;
-}
-.expensesSection {
-  margin-top: 1rem;
-}
-.expensesHeaderRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-.expensesSummary {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  color: #444;
-}
-.summaryItem strong {
-  color: #111;
-}
-
-.emptyCard {
-  background: #fff;
-  border: 1px solid #e9ecef;
-  border-radius: 10px;
-  padding: 1rem;
-  text-align: center;
-  color: #666;
 }

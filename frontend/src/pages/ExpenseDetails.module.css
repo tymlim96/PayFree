@@ -1,0 +1,157 @@
+/* src/pages/ExpenseDetails.module.css */
+.container {
+  max-width: 720px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+.title {
+  margin: 0 0 0.75rem 0;
+  color: #333;
+  text-align: left;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  padding: 1rem;
+}
+.row {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 0.75rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px dashed #e9ecef;
+}
+.row:last-child {
+  border-bottom: none;
+}
+.label {
+  color: #6b7280;
+  font-weight: 600;
+}
+.value {
+  color: #111827;
+  font-weight: 600;
+}
+
+.sharesBlock {
+  margin-top: 1rem;
+  border-top: 1px solid #f0f2f5;
+  padding-top: 0.75rem;
+}
+.sharesTitle {
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.35rem;
+}
+.sharesList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  row-gap: 0.4rem;
+}
+.sharesList li {
+  display: contents;
+}
+.shareName {
+  color: #333;
+}
+.shareAmt {
+  color: #111;
+  font-weight: 700;
+}
+.helper {
+  color: #666;
+}
+
+/* Delete confirm */
+.deleteSection {
+  margin-top: 1.25rem;
+}
+.confirmCard {
+  border: 1px solid #ffe5e7;
+  background: #fff5f6;
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+}
+.confirmText {
+  margin: 0 0 0.5rem 0;
+  color: #5c0a11;
+}
+.input {
+  width: 100%;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+}
+.confirmRow {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+.secondaryBtn {
+  background: #f8f9fa;
+  border: 1px solid #ced4da;
+  color: #333;
+  padding: 0.6rem 0.9rem;
+  min-height: 44px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.secondaryBtn:hover {
+  background: #e9ecef;
+}
+.dangerBtn {
+  background: #dc3545;
+  border: 1px solid #dc3545;
+  color: #fff;
+  padding: 0.6rem 0.9rem;
+  min-height: 44px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.dangerBtn:hover {
+  background: #b02a37;
+}
+
+.bottomNav {
+  margin-top: 2rem;
+}
+
+.center {
+  text-align: center;
+}
+.error {
+  color: #d32f2f;
+  text-align: center;
+}
+.empty {
+  color: #555;
+  text-align: center;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 0.9rem;
+  font-size: clamp(1rem, 1.8vw, 1.1rem);
+  line-height: 1;
+  min-height: 44px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (max-width: 520px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+}

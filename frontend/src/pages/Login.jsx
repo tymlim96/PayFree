@@ -17,14 +17,6 @@ export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  // Redirect to Trips if already logged in
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      navigate("/trips");
-    }
-  }, [navigate]);
-
   // Flash message
   useEffect(() => {
     if (flashMsg) {
@@ -38,11 +30,13 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Upon success -> gives a token in res
       const res = await axios.post("http://localhost:5000/auth/login", {
         email,
         password,
       });
 
+      // Set AuthContext global variables
       await login(res.data.token);
       setMsg("Logged in successfully");
       setStatus("success");

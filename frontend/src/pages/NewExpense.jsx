@@ -5,6 +5,7 @@ import axios from "axios";
 import { LinkRow } from "../components/LinkRow";
 import styles from "./NewExpense.module.css";
 
+// Getting directly from token -> stores id
 function decodeJwtUserId(token) {
   try {
     const part = token.split(".")[1];
@@ -39,6 +40,7 @@ export default function NewExpense() {
   const [msg, setMsg] = useState("");
 
   const token = localStorage.getItem("token");
+  // useMemo useful cos of constant form changes
   const authedUserId = useMemo(
     () => (token ? decodeJwtUserId(token) : null),
     [token]

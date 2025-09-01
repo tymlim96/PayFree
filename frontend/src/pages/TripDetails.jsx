@@ -1,10 +1,11 @@
-// src/pages/TripDetails.jsx
 import React, { useEffect, useState, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import styles from "./TripDetails.module.css";
 import { LinkRow } from "../components/LinkRow";
 
+// Getting directly from token -> stores id
+// Check whether current user is owner (unlocks delete btn)
 function decodeJwtUserId(token) {
   try {
     const part = token.split(".")[1];
@@ -42,6 +43,17 @@ export default function TripDetails() {
   const [deleting, setDeleting] = useState(false);
   const confirmMatched = confirmText === "delete";
 
+  // expenses state
+  const [expenses, setExpenses] = useState([]);
+  const [loadingExp, setLoadingExp] = useState(true);
+  const [expErr, setExpErr] = useState("");
+
+  // balance state
+  const [balance, setBalance] = useState(null); // in cents
+  const [balanceCcy, setBalanceCcy] = useState("");
+  const [loadingBal, setLoadingBal] = useState(true);
+  const [balErr, setBalErr] = useState("");
+
   const token = localStorage.getItem("token");
   const authedUserId = token ? decodeJwtUserId(token) : null;
 
@@ -57,6 +69,46 @@ export default function TripDetails() {
         setErr("Failed to load trip details");
       } finally {
         setLoading(false);
+      }
+    })();
+  }, [id]);
+
+  // fetch expenses
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoadingExp(true);
+        setExpErr("");
+        const jwt = localStorage.getItem("token");
+        const res = await axios.get(
+          `http://localhost:5000/trips/${id}/expenses`,
+          { headers: { Authorization: `Bearer ${jwt}` } }
+        );
+        setExpenses(res.data?.expenses || []);
+      } catch {
+        setExpErr("Failed to load expenses");
+      } finally {
+        setLoadingExp(false);
+      }
+    })();
+  }, [id]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoadingBal(true);
+        setBalErr("");
+        const jwt = localStorage.getItem("token");
+        const res = await axios.get(
+          `http://localhost:5000/trips/${id}/my-balance`,
+          { headers: { Authorization: `Bearer ${jwt}` } }
+        );
+        setBalance(res.data?.balance_cents ?? 0);
+        setBalanceCcy(res.data?.currency_code ?? "");
+      } catch {
+        setBalErr("Failed to load balance");
+      } finally {
+        setLoadingBal(false);
       }
     })();
   }, [id]);
@@ -142,6 +194,15 @@ export default function TripDetails() {
         >
           + New Expense
         </button>
+
+        <button
+          type="button"
+          className={`${styles.btn} ${styles.settleBtn}`}
+          onClick={() => navigate(`/trips/${id}/settle`)}
+          title="Go to settle-up page for this trip"
+        >
+          Settle Debts
+        </button>
       </div>
 
       {/* Trip meta (conditionally shown) */}
@@ -196,6 +257,89 @@ export default function TripDetails() {
           </div>
         </div>
       )}
+
+      {/* Expenses list */}
+      <div className={styles.expensesSection}>
+        <div className={styles.expensesHeaderRow}>
+          <h3 className={styles.subTitle}>Expenses</h3>
+
+          <div className={styles.expensesSummary}>
+            {loadingBal ? (
+              <span className={styles.summaryItem}>Calculating debt…</span>
+            ) : balErr ? (
+              <span className={styles.summaryItem}>{balErr}</span>
+            ) : (
+              <span
+                className={`${styles.summaryItem} ${
+                  balance > 0
+                    ? styles.debtPositive
+                    : balance < 0
+                    ? styles.debtNegative
+                    : ""
+                }`}
+                title="Positive = you owe; Negative = others owe you"
+              >
+                <strong className={styles.debtLabel}>Debt:</strong>&nbsp;
+                <strong className={styles.debtAmount}>
+                  {balance < 0 && "−"}
+                  {(Math.abs(balance) / 100).toFixed(2)} {balanceCcy}
+                </strong>
+              </span>
+            )}
+          </div>
+        </div>
+
+        {loadingExp ? (
+          <div className={styles.emptyCard}>Loading expenses…</div>
+        ) : expErr ? (
+          <div className={styles.emptyCard}>{expErr}</div>
+        ) : expenses.length === 0 ? (
+          <div className={styles.emptyCard}>No expenses yet.</div>
+        ) : (
+          <ul className={styles.expensesList}>
+            {expenses.map((e) => (
+              <li key={e.id} className={styles.expenseItem}>
+                <Link
+                  to={`/trips/${id}/expenses/${e.id}`}
+                  className={styles.expenseLink}
+                >
+                  <div className={styles.expenseMain}>
+                    <div className={styles.expenseDesc}>{e.description}</div>
+                    <div className={styles.expenseAmt}>
+                      {(e.amount_cents / 100).toFixed(2)} {e.currency_code}
+                    </div>
+                  </div>
+                  <div className={styles.expenseMeta}>
+                    <span>
+                      Paid by{" "}
+                      <strong>
+                        {e.payer_name || `User ${e.paid_by_user_id}`}
+                      </strong>
+                    </span>
+                    <span>•</span>
+                    <span>{new Date(e.created_at).toLocaleString()}</span>
+                    <span>•</span>
+                    <span>
+                      {e.split_mode === "equal"
+                        ? "Split evenly"
+                        : "Manual split"}
+                    </span>
+                    {e.participants_count > 0 && (
+                      <>
+                        <span>•</span>
+                        <span>
+                          {e.participants_count} participant
+                          {e.participants_count > 1 ? "s" : ""}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       {/* Delete section (owner-only) */}
       {isOwner && (

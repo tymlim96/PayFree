@@ -5,16 +5,19 @@ import pool from "../db.js";
 
 const router = express.Router();
 
-/** GET /trips - list trips the user belongs to */
+/*──────────────────────────────────────────────────────────────
+  GET /trips
+  List trips the authenticated user belongs to
+──────────────────────────────────────────────────────────────*/
 router.get("/", async (req, res) => {
   try {
     const q = await pool.query(
       `
       SELECT t.id, t.name, t.currency_code, t.created_at
-        FROM trip_members tm
-        JOIN trips t ON t.id = tm.trip_id
-       WHERE tm.user_id = $1
-       ORDER BY t.created_at DESC
+      FROM trip_members tm
+      JOIN trips t ON t.id = tm.trip_id
+      WHERE tm.user_id = $1
+      ORDER BY t.created_at DESC
       `,
       [req.userId]
     );
@@ -25,7 +28,10 @@ router.get("/", async (req, res) => {
   }
 });
 
-/** POST /trips - create a trip and return a permanent invite_url */
+/*──────────────────────────────────────────────────────────────
+  POST /trips
+  Create a new trip and return its permanent invite URL
+──────────────────────────────────────────────────────────────*/
 router.post("/", async (req, res) => {
   const client = await pool.connect();
   try {
@@ -91,7 +97,10 @@ router.post("/", async (req, res) => {
   }
 });
 
-/** GET /trips/:id - fetch details of a single trip (member-only) */
+/*──────────────────────────────────────────────────────────────
+  GET /trips/:id
+  Fetch details of a single trip (member-only)
+──────────────────────────────────────────────────────────────*/
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -101,8 +110,8 @@ router.get("/:id", async (req, res) => {
         FROM trips t
         JOIN users u ON t.owner_id = u.id
         JOIN trip_members tm ON tm.trip_id = t.id
-       WHERE t.id = $1
-         AND tm.user_id = $2
+      WHERE t.id = $1
+        AND tm.user_id = $2
       `,
       [id, req.userId]
     );
@@ -116,7 +125,10 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-/** GET /trips/:id/invite - get permanent invite URL for a trip (member-only) */
+/*──────────────────────────────────────────────────────────────
+  GET /trips/:id/invite
+  Get permanent invite URL for a trip (member-only)
+──────────────────────────────────────────────────────────────*/
 router.get("/:id/invite", async (req, res) => {
   try {
     const { id } = req.params;
@@ -141,7 +153,10 @@ router.get("/:id/invite", async (req, res) => {
   }
 });
 
-/** POST /trips/join/:token - redeem permanent invite (auth required) */
+/*──────────────────────────────────────────────────────────────
+  POST /trips/join/:token
+  Redeem permanent invite (auth required)
+──────────────────────────────────────────────────────────────*/
 router.post("/join/:token", async (req, res) => {
   const client = await pool.connect();
   try {
@@ -154,8 +169,8 @@ router.post("/join/:token", async (req, res) => {
       SELECT i.trip_id, t.name
         FROM trip_invites i
         JOIN trips t ON t.id = i.trip_id
-       WHERE i.token = $1
-       FOR UPDATE
+      WHERE i.token = $1
+      FOR UPDATE
       `,
       [token]
     );
@@ -203,7 +218,10 @@ router.post("/join/:token", async (req, res) => {
   }
 });
 
-/** DELETE /trips/:id - owner-only delete */
+/*──────────────────────────────────────────────────────────────
+  DELETE /trips/:id
+  Delete a trip (owner-only)
+──────────────────────────────────────────────────────────────*/
 router.delete("/:id", async (req, res) => {
   const client = await pool.connect();
   try {
@@ -241,7 +259,10 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-/** GET /trips/:id/members - list members (only if requester is a member) */
+/*──────────────────────────────────────────────────────────────
+  GET /trips/:id/members
+  List members of a trip (member-only)
+──────────────────────────────────────────────────────────────*/
 router.get("/:id/members", async (req, res) => {
   try {
     const { id } = req.params;
@@ -273,26 +294,10 @@ router.get("/:id/members", async (req, res) => {
   }
 });
 
-/**
- * POST /trips/:id/expenses
- * Body (equal):
- * {
- *   description: string,
- *   amount_cents: number,
- *   currency_code: 'USD',
- *   split_mode: 'equal',
- *   paid_by_user_id: number,
- *   participants: [user_id, ...]   // members who partake
- * }
- *
- * Body (manual):
- * {
- *   description, amount_cents, currency_code,
- *   split_mode: 'manual',
- *   paid_by_user_id: number,
- *   shares: [{ user_id, share_cents }, ...] // must sum to amount_cents
- * }
- */
+/*──────────────────────────────────────────────────────────────
+  POST /trips/:id/expenses
+  Create an expense (equal or manual split)
+──────────────────────────────────────────────────────────────*/
 router.post("/:id/expenses", async (req, res) => {
   const client = await pool.connect();
   try {
@@ -338,7 +343,7 @@ router.post("/:id/expenses", async (req, res) => {
 
     await client.query("BEGIN");
 
-    // Ensure requester is a member of trip
+    // Ensure requester is a member of the trip
     const access = await client.query(
       `SELECT 1 FROM trip_members WHERE trip_id = $1 AND user_id = $2`,
       [tripId, req.userId]
@@ -348,7 +353,7 @@ router.post("/:id/expenses", async (req, res) => {
       return res.status(403).json({ error: "No access" });
     }
 
-    // Ensure payer is a member of trip (and by default must be the requester)
+    // Ensure payer is a member of the trip (but may differ from requester)
     const payerIsMember = await client.query(
       `SELECT 1 FROM trip_members WHERE trip_id = $1 AND user_id = $2`,
       [tripId, payerId]
@@ -358,13 +363,6 @@ router.post("/:id/expenses", async (req, res) => {
       return res
         .status(400)
         .json({ error: "Payer must be a member of the trip" });
-    }
-    // Optional: enforce payer === requester (comment out if you want to allow others)
-    if (payerId !== req.userId) {
-      await client.query("ROLLBACK");
-      return res
-        .status(403)
-        .json({ error: "Payer must be the authenticated user" });
     }
 
     // Optional: verify currency matches trip (soft check)
@@ -376,11 +374,9 @@ router.post("/:id/expenses", async (req, res) => {
       await client.query("ROLLBACK");
       return res.status(404).json({ error: "Trip not found" });
     }
-    // You can enforce currency consistency if desired:
-    // if (tripRow.rows[0].currency_code !== code) { ... }
 
     // Build shares depending on mode
-    let finalShares = []; // [{user_id, share_cents}, ...]
+    let finalShares = []; // [{ user_id, share_cents }, ...]
 
     if (mode === "equal") {
       if (!Array.isArray(participants) || participants.length === 0) {
@@ -389,7 +385,6 @@ router.post("/:id/expenses", async (req, res) => {
           .status(400)
           .json({ error: "participants array required for equal split" });
       }
-      // Deduplicate and ensure all are members
       const uniq = [...new Set(participants.map((v) => Number(v)))].filter(
         Number.isInteger
       );
@@ -408,7 +403,6 @@ router.post("/:id/expenses", async (req, res) => {
           .json({ error: "One or more participants are not trip members" });
       }
 
-      // Distribute evenly with remainder
       const n = uniq.length;
       const base = Math.floor(amountCents / n);
       let remainder = amountCents - base * n;
@@ -424,7 +418,6 @@ router.post("/:id/expenses", async (req, res) => {
           .status(400)
           .json({ error: "shares array required for manual split" });
       }
-      // Validate & normalize
       const uniqIds = new Set();
       let sum = 0;
       for (const s of shares) {
@@ -447,7 +440,6 @@ router.post("/:id/expenses", async (req, res) => {
           .status(400)
           .json({ error: "Shares do not sum to amount_cents" });
       }
-      // Ensure all listed users are members
       const ids = [...uniqIds];
       const memQ = await client.query(
         `SELECT user_id FROM trip_members WHERE trip_id = $1 AND user_id = ANY($2::int[])`,
@@ -495,6 +487,280 @@ router.post("/:id/expenses", async (req, res) => {
     return res.status(500).json({ error: "Failed to create expense" });
   } finally {
     client.release();
+  }
+});
+
+/*──────────────────────────────────────────────────────────────
+  GET /trips/:id/expenses
+  List expenses for a trip (member-only)
+──────────────────────────────────────────────────────────────*/
+router.get("/:id/expenses", async (req, res) => {
+  try {
+    const { id: tripId } = req.params;
+
+    // requester must be a member of the trip
+    const access = await pool.query(
+      `SELECT 1 FROM trip_members WHERE trip_id = $1 AND user_id = $2`,
+      [tripId, req.userId]
+    );
+    if (access.rowCount === 0) {
+      return res.status(403).json({ error: "No access" });
+    }
+
+    // list expenses with payer info
+    const q = await pool.query(
+      `
+      SELECT
+        e.id,
+        e.description,
+        e.amount_cents,
+        e.currency_code,
+        e.split_mode,
+        e.paid_by_user_id,
+        e.created_at,
+        u.full_name AS payer_name
+      FROM expenses e
+      JOIN users u ON u.id = e.paid_by_user_id
+      WHERE e.trip_id = $1
+      ORDER BY e.created_at DESC
+      `,
+      [tripId]
+    );
+
+    // (Optional) also include participants count for each expense
+    const ids = q.rows.map((r) => r.id);
+    let counts = {};
+    if (ids.length > 0) {
+      const cq = await pool.query(
+        `
+        SELECT expense_id, COUNT(*)::int AS participants_count
+          FROM expense_shares
+        WHERE expense_id = ANY($1::int[])
+        GROUP BY expense_id
+        `,
+        [ids]
+      );
+      counts = Object.fromEntries(
+        cq.rows.map((r) => [r.expense_id, r.participants_count])
+      );
+    }
+
+    const expenses = q.rows.map((r) => ({
+      ...r,
+      participants_count: counts[r.id] ?? 0,
+    }));
+
+    return res.json({ expenses });
+  } catch (err) {
+    console.error("[TRIPS] LIST EXPENSES ERROR:", err);
+    return res.status(500).json({ error: "Failed to load expenses" });
+  }
+});
+
+/*──────────────────────────────────────────────────────────────
+  GET /trips/:id/my-balance
+  Your net debt for this trip.
+  Returns: { balance_cents, currency_code }
+  balance_cents = sum(shares you owe) - sum(expenses you paid)
+  Positive => you owe others; Negative => others owe you
+──────────────────────────────────────────────────────────────*/
+router.get("/:id/my-balance", async (req, res) => {
+  try {
+    const { id: tripId } = req.params;
+
+    // must be a member
+    const access = await pool.query(
+      `SELECT 1 FROM trip_members WHERE trip_id = $1 AND user_id = $2`,
+      [tripId, req.userId]
+    );
+    if (access.rowCount === 0) {
+      return res.status(403).json({ error: "No access" });
+    }
+
+    // trip currency (for display)
+    const t = await pool.query(
+      `SELECT currency_code FROM trips WHERE id = $1`,
+      [tripId]
+    );
+    if (t.rowCount === 0) {
+      return res.status(404).json({ error: "Trip not found" });
+    }
+    const currency_code = t.rows[0].currency_code;
+
+    // total you owe (sum of your shares)
+    const owedQ = await pool.query(
+      `
+      SELECT COALESCE(SUM(es.share_cents), 0)::int AS owed
+      FROM expense_shares es
+      JOIN expenses e ON e.id = es.expense_id
+      WHERE e.trip_id = $1 AND es.user_id = $2
+      `,
+      [tripId, req.userId]
+    );
+    const owed = owedQ.rows[0].owed || 0;
+
+    // total you paid
+    const paidQ = await pool.query(
+      `
+      SELECT COALESCE(SUM(e.amount_cents), 0)::int AS paid
+      FROM expenses e
+      WHERE e.trip_id = $1 AND e.paid_by_user_id = $2
+      `,
+      [tripId, req.userId]
+    );
+    const paid = paidQ.rows[0].paid || 0;
+
+    const balance_cents = owed - paid; // +ve you owe; -ve others owe you
+
+    return res.json({ balance_cents, currency_code });
+  } catch (err) {
+    console.error("[TRIPS] MY BALANCE ERROR:", err);
+    return res.status(500).json({ error: "Failed to load balance" });
+  }
+});
+
+/*──────────────────────────────────────────────────────────────
+  GET /trips/:id/expenses/:expenseId
+  Expense details (member-only)
+──────────────────────────────────────────────────────────────*/
+router.get("/:id/expenses/:expenseId", async (req, res) => {
+  try {
+    const { id: tripId, expenseId } = req.params;
+
+    // requester must be a member
+    const access = await pool.query(
+      `SELECT 1 FROM trip_members WHERE trip_id = $1 AND user_id = $2`,
+      [tripId, req.userId]
+    );
+    if (access.rowCount === 0) {
+      return res.status(403).json({ error: "No access" });
+    }
+
+    // expense (ensure belongs to trip)
+    const q = await pool.query(
+      `
+      SELECT
+        e.id,
+        e.trip_id,
+        e.description,
+        e.amount_cents,
+        e.currency_code,
+        e.split_mode,
+        e.paid_by_user_id,
+        e.created_at,
+        u.full_name AS payer_name
+      FROM expenses e
+      JOIN users u ON u.id = e.paid_by_user_id
+      WHERE e.id = $1 AND e.trip_id = $2
+      `,
+      [expenseId, tripId]
+    );
+    if (q.rowCount === 0) {
+      return res.status(404).json({ error: "Expense not found" });
+    }
+
+    const expense = q.rows[0];
+
+    // shares + user names
+    const s = await pool.query(
+      `
+      SELECT es.user_id, es.share_cents, u.full_name AS user_name
+      FROM expense_shares es
+      JOIN users u ON u.id = es.user_id
+      WHERE es.expense_id = $1
+      ORDER BY u.full_name ASC
+      `,
+      [expenseId]
+    );
+    expense.shares = s.rows;
+
+    return res.json({ expense });
+  } catch (err) {
+    console.error("[TRIPS] EXPENSE DETAIL ERROR:", err);
+    return res.status(500).json({ error: "Failed to load expense" });
+  }
+});
+
+/*──────────────────────────────────────────────────────────────
+  DELETE /trips/:id/expenses/:expenseId
+  Delete an expense (member-only)
+──────────────────────────────────────────────────────────────*/
+router.delete("/:id/expenses/:expenseId", async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const { id: tripId, expenseId } = req.params;
+
+    await client.query("BEGIN");
+
+    // requester must be a member
+    const access = await client.query(
+      `SELECT 1 FROM trip_members WHERE trip_id = $1 AND user_id = $2`,
+      [tripId, req.userId]
+    );
+    if (access.rowCount === 0) {
+      await client.query("ROLLBACK");
+      return res.status(403).json({ error: "No access" });
+    }
+
+    // ensure the expense belongs to this trip
+    const found = await client.query(
+      `SELECT id FROM expenses WHERE id = $1 AND trip_id = $2 FOR UPDATE`,
+      [expenseId, tripId]
+    );
+    if (found.rowCount === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Expense not found" });
+    }
+
+    // cascade delete shares then expense (or rely on FK cascade if set)
+    await client.query(`DELETE FROM expense_shares WHERE expense_id = $1`, [
+      expenseId,
+    ]);
+    await client.query(`DELETE FROM expenses WHERE id = $1`, [expenseId]);
+
+    await client.query("COMMIT");
+    return res.status(204).send();
+  } catch (err) {
+    await client.query("ROLLBACK");
+    console.error("[TRIPS] DELETE EXPENSE ERROR:", err);
+    return res.status(500).json({ error: "Failed to delete expense" });
+  } finally {
+    client.release();
+  }
+});
+
+/*──────────────────────────────────────────────────────────────
+  GET /trips/:id/settlements
+  Get all settlements for a trip (visible to members)
+──────────────────────────────────────────────────────────────*/
+router.get("/:id/settlements", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const q = await pool.query(
+      `
+      SELECT 
+        s.id,
+        s.trip_id,
+        s.from_user_id,
+        fu.full_name AS from_user_name,
+        s.to_user_id,
+        tu.full_name AS to_user_name,
+        s.amount_cents,
+        s.currency_code,
+        s.created_at
+      FROM settlements s
+      JOIN users fu ON fu.id = s.from_user_id
+      JOIN users tu ON tu.id = s.to_user_id
+      WHERE s.trip_id = $1
+      ORDER BY s.created_at DESC
+      `,
+      [id]
+    );
+
+    return res.json({ settlements: q.rows });
+  } catch (e) {
+    console.error("Failed to fetch settlements", e);
+    return res.status(500).json({ error: "Failed to fetch settlements" });
   }
 });
 

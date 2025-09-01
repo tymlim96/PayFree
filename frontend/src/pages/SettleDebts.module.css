@@ -1,0 +1,93 @@
+.container {
+  max-width: 720px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.title {
+  margin: 0 0 1rem 0;
+  text-align: left;
+  color: #333;
+}
+
+.actionsRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 0.9rem;
+  font-size: clamp(1rem, 1.8vw, 1.1rem);
+  min-height: 44px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.newSettleBtn {
+  background: #d35400; /* darker orange for better contrast */
+  border-color: #d35400;
+  color: #fff;
+}
+.newSettleBtn:hover {
+  background: #a84300; /* deeper orange on hover */
+  border-color: #a84300;
+}
+
+.settlementList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.settlementItem {
+  background: #fff8f0;
+  border: 1px solid #ffe0b3;
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.settlementRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.amount {
+  font-weight: 700;
+  color: #111827;
+}
+
+.meta {
+  color: #444;
+  font-size: 0.95rem;
+}
+
+.date {
+  font-size: 0.85rem;
+  color: #777;
+}
+
+.emptyCard {
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+  color: #666;
+}
+
+.error {
+  color: #d32f2f;
+  text-align: center;
+}
+
+.bottomNav {
+  margin-top: 3rem;
+}

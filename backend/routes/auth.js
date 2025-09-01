@@ -4,8 +4,9 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { OAuth2Client } from "google-auth-library";
-import nodemailer from "nodemailer";
 import pool from "../db.js";
+import requireAuth from "../middleware/requireAuth.js";
+import { getMailer } from "../lib/mailer.js";
 
 const router = express.Router();
 
@@ -19,7 +20,10 @@ const oauthClient = new OAuth2Client(
   process.env.OAUTH_REDIRECT_URI
 );
 
-// ---------- Google OAuth ----------
+/*──────────────────────────────────────────────────────────────
+  GET /auth/google
+  Start Google OAuth flow
+──────────────────────────────────────────────────────────────*/
 router.get("/google", (req, res) => {
   const state = crypto.randomBytes(16).toString("hex");
   res.cookie("oauth_state", state, {
@@ -39,6 +43,10 @@ router.get("/google", (req, res) => {
   res.redirect(url);
 });
 
+/*──────────────────────────────────────────────────────────────
+  GET /auth/google/callback
+  Handle Google OAuth callback, issue JWT, redirect to FE
+──────────────────────────────────────────────────────────────*/
 router.get("/google/callback", async (req, res) => {
   const { code, state } = req.query;
   const stateCookie = req.cookies?.oauth_state;
@@ -108,35 +116,40 @@ router.get("/google/callback", async (req, res) => {
   }
 });
 
-// ---------- Policy (single source of truth) ----------
+/*──────────────────────────────────────────────────────────────
+  GET /auth/policy
+  Return password policy & reset token expiry
+──────────────────────────────────────────────────────────────*/
 router.get("/policy", (_req, res) => {
-  const minPasswordLen = Number(process.env.MIN_PASSWORD_LEN || 6);
+  const minPasswordLen = Number(MIN_PASSWORD_LEN || 6);
   const resetTokenExpiresMin = Number(
     process.env.RESET_TOKEN_EXPIRES_MIN || 60
   );
   res.json({ minPasswordLen, resetTokenExpiresMin });
 });
 
-// ---------- Email/Password signup & login ----------
+/*──────────────────────────────────────────────────────────────
+  POST /auth/signup
+  Email/Password sign-up
+──────────────────────────────────────────────────────────────*/
 router.post("/signup", async (req, res) => {
   const { email, password, fullName } = req.body;
   if (!email || !password || !fullName) {
     return res.status(400).json({ error: "Missing fields" });
   }
   if (password.length < MIN_PASSWORD_LEN) {
-    return res
-      .status(400)
-      .json({
-        error: `Password must be at least ${MIN_PASSWORD_LEN} characters`,
-      });
+    return res.status(400).json({
+      error: `Password must be at least ${MIN_PASSWORD_LEN} characters`,
+    });
   }
   try {
+    const emailNorm = email.trim().toLowerCase();
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
     const result = await pool.query(
       `INSERT INTO users (email, password_hash, full_name)
        VALUES ($1, $2, $3)
        RETURNING id, email, full_name, created_at`,
-      [email, passwordHash, fullName]
+      [emailNorm, passwordHash, fullName]
     );
     res.status(201).json({ user: result.rows[0] });
   } catch (err) {
@@ -148,6 +161,10 @@ router.post("/signup", async (req, res) => {
   }
 });
 
+/*──────────────────────────────────────────────────────────────
+  POST /auth/login
+  Email/Password login -> returns JWT
+──────────────────────────────────────────────────────────────*/
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -160,12 +177,9 @@ router.post("/login", async (req, res) => {
 
     const { id, password_hash } = result.rows[0];
     if (!password_hash) {
-      return res
-        .status(400)
-        .json({
-          error:
-            "This account uses Google Sign-In. Please continue with Google.",
-        });
+      return res.status(400).json({
+        error: "This account uses Google Sign-In. Please continue with Google.",
+      });
     }
 
     const ok = await bcrypt.compare(password, password_hash);
@@ -181,89 +195,60 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// ---------- Profile (/me) ----------
-router.get("/me", async (req, res) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader?.startsWith("Bearer ")) {
-    return res.status(401).json({ error: "Missing token" });
-  }
-  const token = authHeader.split(" ")[1];
-
-  try {
-    const { userId } = jwt.verify(token, process.env.JWT_SECRET);
-    const q = await pool.query(
-      `SELECT email, full_name,
-              (password_hash IS NOT NULL) AS has_password,
-              (google_id IS NOT NULL)   AS google_linked
-         FROM users
-        WHERE id = $1`,
-      [userId]
-    );
-    if (!q.rows.length)
-      return res.status(404).json({ error: "User not found" });
-
-    const row = q.rows[0];
-    res.json({
-      email: row.email,
-      fullName: row.full_name,
-      hasPassword: row.has_password,
-      googleLinked: row.google_linked,
-    });
-  } catch (err) {
-    return res.status(401).json({ error: "Invalid or expired token" });
-  }
+/*──────────────────────────────────────────────────────────────
+  GET /auth/me
+  Return profile info (auth required)
+──────────────────────────────────────────────────────────────*/
+router.get("/me", requireAuth, async (req, res) => {
+  const q = await pool.query(
+    `SELECT email, full_name,
+      (password_hash IS NOT NULL) AS has_password,
+      (google_id IS NOT NULL) AS google_linked
+    FROM users WHERE id = $1`,
+    [req.userId]
+  );
+  if (!q.rows.length) return res.status(404).json({ error: "User not found" });
+  const r = q.rows[0];
+  res.json({
+    email: r.email,
+    fullName: r.full_name,
+    hasPassword: r.has_password,
+    googleLinked: r.google_linked,
+  });
 });
 
-// ---------- Update full name ----------
-router.put("/name", async (req, res) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader?.startsWith("Bearer ")) {
-    return res.status(401).json({ error: "Missing token" });
-  }
-  const token = authHeader.split(" ")[1];
-
+/*──────────────────────────────────────────────────────────────
+  PUT /auth/name
+  Update full name (auth required)
+──────────────────────────────────────────────────────────────*/
+router.put("/name", requireAuth, async (req, res) => {
   const { fullName } = req.body;
-  if (!fullName || !fullName.trim()) {
+  if (!fullName?.trim())
     return res.status(400).json({ error: "Full name is required" });
-  }
-
-  try {
-    const { userId } = jwt.verify(token, process.env.JWT_SECRET);
-    const q = await pool.query(
-      `UPDATE users SET full_name = $1 WHERE id = $2 RETURNING full_name`,
-      [fullName.trim(), userId]
-    );
-    if (!q.rows.length)
-      return res.status(404).json({ error: "User not found" });
-    res.json({ fullName: q.rows[0].full_name });
-  } catch (err) {
-    return res.status(401).json({ error: "Invalid or expired token" });
-  }
+  const q = await pool.query(
+    `UPDATE users SET full_name = $1 WHERE id = $2 RETURNING full_name`,
+    [fullName.trim(), req.userId]
+  );
+  if (!q.rows.length) return res.status(404).json({ error: "User not found" });
+  res.json({ fullName: q.rows[0].full_name });
 });
 
-// ---------- Add/Change password ----------
-router.put("/password", async (req, res) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader?.startsWith("Bearer ")) {
-    return res.status(401).json({ error: "Missing token" });
-  }
-  const token = authHeader.split(" ")[1];
-
+/*──────────────────────────────────────────────────────────────
+  PUT /auth/password
+  Add/Change password (auth required)
+──────────────────────────────────────────────────────────────*/
+router.put("/password", requireAuth, async (req, res) => {
   const { currentPassword, newPassword } = req.body;
   if (!newPassword || newPassword.length < MIN_PASSWORD_LEN) {
-    return res
-      .status(400)
-      .json({
-        error: `New password must be at least ${MIN_PASSWORD_LEN} characters`,
-      });
+    return res.status(400).json({
+      error: `New password must be at least ${MIN_PASSWORD_LEN} characters`,
+    });
   }
 
   try {
-    const { userId } = jwt.verify(token, process.env.JWT_SECRET);
-
     const u = await pool.query(
       `SELECT password_hash FROM users WHERE id = $1`,
-      [userId]
+      [req.userId]
     );
     if (!u.rows.length)
       return res.status(404).json({ error: "User not found" });
@@ -281,7 +266,7 @@ router.put("/password", async (req, res) => {
     const hash = await bcrypt.hash(newPassword, SALT_ROUNDS);
     await pool.query(`UPDATE users SET password_hash = $1 WHERE id = $2`, [
       hash,
-      userId,
+      req.userId,
     ]);
 
     res.json({ message: hasPassword ? "Password changed" : "Password set" });
@@ -290,22 +275,13 @@ router.put("/password", async (req, res) => {
   }
 });
 
+/*──────────────────────────────────────────────────────────────
+  POST /auth/reset-request
+  Begin password reset flow (email link). Always returns generic msg.
+──────────────────────────────────────────────────────────────*/
 // ---------- Reset password (email flow) ----------
 function mailFrom() {
   return process.env.MAIL_FROM || `PayFree <${process.env.SMTP_USER}>`;
-}
-async function buildTransporter() {
-  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_SECURE } =
-    process.env;
-  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
-    throw new Error("SMTP env not set (SMTP_HOST/SMTP_USER/SMTP_PASS)");
-  }
-  return nodemailer.createTransport({
-    host: SMTP_HOST,
-    port: Number(SMTP_PORT || 465),
-    secure: String(SMTP_SECURE).toLowerCase() === "true",
-    auth: { user: SMTP_USER, pass: SMTP_PASS },
-  });
 }
 
 router.post("/reset-request", async (req, res) => {
@@ -344,15 +320,15 @@ router.post("/reset-request", async (req, res) => {
       process.env.APP_URL || "http://localhost:3000"
     }/reset-password/${rawToken}`;
 
-    const transporter = await buildTransporter();
+    const transporter = await getMailer();
     await transporter.sendMail({
       from: mailFrom(),
       to: email,
       subject: "Reset your PayFree password",
       text: `We received a request to reset your password.
-Set a new password: ${link}
-This link expires in ${expiresMin} minutes.
-If you didn’t request this, you can ignore this email.`,
+            Set a new password: ${link}
+            This link expires in ${expiresMin} minutes.
+            If you didn’t request this, you can ignore this email.`,
       html: `
         <p>We received a request to reset your password.</p>
         <p><a href="${link}">Click here to set a new password</a></p>
@@ -368,6 +344,10 @@ If you didn’t request this, you can ignore this email.`,
   }
 });
 
+/*──────────────────────────────────────────────────────────────
+  GET /auth/reset-verify?token=...
+  Verify reset token (unused & unexpired)
+──────────────────────────────────────────────────────────────*/
 router.get("/reset-verify", async (req, res) => {
   const { token } = req.query;
   if (!token) return res.status(400).json({ error: "Missing token" });
@@ -388,16 +368,18 @@ router.get("/reset-verify", async (req, res) => {
   }
 });
 
+/*──────────────────────────────────────────────────────────────
+  POST /auth/reset
+  Complete password reset with a valid token
+──────────────────────────────────────────────────────────────*/
 router.post("/reset", async (req, res) => {
   const { token, newPassword } = req.body;
   if (!token || !newPassword)
     return res.status(400).json({ error: "Missing fields" });
   if (newPassword.length < MIN_PASSWORD_LEN) {
-    return res
-      .status(400)
-      .json({
-        error: `Password must be at least ${MIN_PASSWORD_LEN} characters`,
-      });
+    return res.status(400).json({
+      error: `Password must be at least ${MIN_PASSWORD_LEN} characters`,
+    });
   }
 
   try {

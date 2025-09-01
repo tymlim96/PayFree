@@ -22,6 +22,8 @@ import NewTrip from "./pages/NewTrip";
 import JoinTrip from "./pages/JoinTrip";
 import TripDetails from "./pages/TripDetails";
 import NewExpense from "./pages/NewExpense";
+import ExpenseDetails from "./pages/ExpenseDetails";
+import SettleDebts from "./pages/SettleDebts";
 import { PolicyProvider } from "./contexts/PolicyContext";
 import { useAuth } from "./contexts/AuthContext";
 
@@ -87,6 +89,11 @@ function MainApp() {
           <Route path="/trips/new" element={<NewTrip />} />
           <Route path="/trips/:id" element={<TripDetails />} />
           <Route path="/trips/:id/expenses/new" element={<NewExpense />} />
+          <Route
+            path="/trips/:id/expenses/:expenseId"
+            element={<ExpenseDetails />}
+          />
+          <Route path="/trips/:id/settle" element={<SettleDebts />} />
           <Route path="/account" element={<Account />} />
           <Route path="/account/change-password" element={<ChangePassword />} />
         </Route>
