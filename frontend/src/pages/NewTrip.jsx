@@ -122,18 +122,19 @@ export default function NewTrip() {
             <Alert type={status === "error" ? "error" : "success"}>{msg}</Alert>
           )}
 
-          <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.5rem" }}>
+          <div className={styles.formActions}>
             <button
               type="submit"
-              className={styles.createBtn}
+              className={`${styles.actionBtn} ${styles.createBtn}`}
               disabled={submitting}
             >
               {submitting ? "Creating…" : "Create Trip"}
             </button>
+
             <button
               type="button"
               onClick={() => navigate("/trips")}
-              className={styles.actionSecondary}
+              className={`${styles.actionBtn} ${styles.actionSecondary}`}
             >
               Cancel
             </button>

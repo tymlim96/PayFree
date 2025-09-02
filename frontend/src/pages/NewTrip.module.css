@@ -37,6 +37,7 @@
   background: #d35400; /* darker orange for better contrast */
   border-color: #d35400;
   color: #fff;
+  width: auto;
 }
 .createBtn:hover {
   background: #a84300; /* deeper orange on hover */
@@ -102,4 +103,48 @@
   margin-top: 0.75rem;
   display: flex;
   gap: 0.75rem;
+}
+
+/* --- Create/Cancel button row (form) --- */
+.formActions {
+  display: flex;
+  flex-wrap: wrap; /* allow stacking on small screens */
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+/* Equal-size buttons inside the form row */
+.actionBtn {
+  width: auto !important; /* beat global 'form button { width:100% }' */
+  flex: 1 1 100%;
+  min-width: 0;
+  min-height: 44px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 0.7rem 1rem;
+  transition: background 0.15s ease-in-out, transform 0.05s ease-in-out;
+}
+
+@media (max-width: 320px) {
+  .formActions {
+    justify-content: center;
+  }
+}
+
+/* ≥320px: sit side-by-side, equal widths, never overflow 420px form */
+@media (min-width: 320px) {
+  .actionBtn {
+    width: auto !important; /* ensure not full-width */
+    flex: 0 1 calc(50% - 0.375rem); /* two columns (gap/2) */
+  }
+}
+
+/* keep your existing color styles; just ensure width isn’t forced */
+.createBtn {
+  width: auto !important;
+}
+.actionSecondary {
+  width: auto !important;
 }

@@ -38,8 +38,8 @@
 }
 
 /* ===== Responsive behavior =====
-   ≤300px: center & stack vertically, allow wrapping to avoid overflow */
-@media (max-width: 300px) {
+   ≤320px: center & stack vertically, allow wrapping to avoid overflow */
+@media (max-width: 320px) {
   .splitRow {
     flex-direction: column;
     justify-content: center;
