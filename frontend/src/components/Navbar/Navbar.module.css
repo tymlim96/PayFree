@@ -28,7 +28,7 @@
 .actions {
   display: flex;
   align-items: center;
-  gap: 0.75rem; /* spacing between Account / Logout etc. */
+  gap: 0.75rem;
 }
 
 /* Nav links */
@@ -54,8 +54,8 @@
 .logoutButton {
   font-size: clamp(1.2rem, 2.6vw, 1.5rem);
   font-weight: 700;
-  padding: 0.35rem 0.6rem; /* tighter left/right */
-  width: auto; /* no stretching */
+  padding: 0.35rem 0.6rem;
+  width: auto; /* wrap to text width */
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
@@ -63,7 +63,6 @@
   white-space: nowrap;
   line-height: 1.1;
   min-height: 44px;
-
   background: #fff;
   color: #007bff;
   border: 1px solid #d6e4ff;
@@ -75,21 +74,111 @@
   outline-offset: 2px;
 }
 
-/* Small-screen tweaks */
-@media (max-width: 520px) {
+/* ---------- Hamburger ---------- */
+.hamburger {
+  display: none; /* shown only on small screens */
+  position: relative;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+.hamburger:focus-visible {
+  outline: 2px solid #fff8e1;
+  outline-offset: 2px;
+}
+/* 3 bars */
+.hamburger span {
+  position: absolute;
+  width: 22px;
+  height: 2px;
+  background: #fff;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: transform 180ms ease, opacity 180ms ease, top 180ms ease;
+}
+.hamburger span:nth-child(1) {
+  top: 12px;
+}
+.hamburger span:nth-child(2) {
+  top: 19px;
+}
+.hamburger span:nth-child(3) {
+  top: 26px;
+}
+
+/* X animation when open */
+.hamburgerOpen span:nth-child(1) {
+  top: 19px;
+  transform: translateX(-50%) rotate(45deg);
+}
+.hamburgerOpen span:nth-child(2) {
+  opacity: 0;
+}
+.hamburgerOpen span:nth-child(3) {
+  top: 19px;
+  transform: translateX(-50%) rotate(-45deg);
+}
+
+/* ---------- Small-screen behavior (≤480px) ---------- */
+@media (max-width: 480px) {
   .navbar {
     padding: 0.75rem;
   }
 
-  .actions {
-    width: 100%;
-    justify-content: space-between;
-    gap: 0.5rem; /* a bit tighter on small screens */
+  .hamburger {
+    display: inline-flex;
   }
 
+  /* collapse by default */
+  .actions {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-end; /* right edge aligns everything */
+    gap: 0.6rem;
+    margin-top: 0.6rem;
+  }
+  .actionsOpen {
+    display: flex;
+  }
+
+  /* compact, right-aligned links (not full width) */
+  .navLink {
+    width: auto;
+    align-self: flex-end;
+    text-align: right;
+    padding: 0.8rem 0.9rem;
+    min-height: 44px;
+    /* optional: keep a decent hit area without stretching */
+    min-width: 8.5rem; /* remove if you prefer zero min width */
+  }
+
+  /* Logout remains compact on the right */
+  .logoutButton {
+    width: auto;
+    align-self: flex-end;
+    margin-top: 0.2rem;
+  }
+}
+
+/* Tiny phones – slightly tighter padding */
+@media (max-width: 380px) {
   .navLink,
   .logoutButton {
-    padding: 0.6rem 0.8rem; /* keep tap targets comfy */
+    padding: 0.7rem 0.85rem;
     min-height: 40px;
+  }
+}
+
+/* Respect users who prefer less motion */
+@media (prefers-reduced-motion: reduce) {
+  .hamburger span {
+    transition: none;
   }
 }
