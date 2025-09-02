@@ -1,3 +1,4 @@
+/* ========== Layout & Basics ========== */
 .container {
   max-width: 720px;
   margin: 2rem auto;
@@ -5,20 +6,21 @@
 }
 .title {
   margin: 0 0 0.75rem 0;
-  color: #333;
+  color: var(--text);
   text-align: left;
 }
 .center {
   text-align: center;
 }
 
+/* ========== Trip summary card ========== */
 .tripMeta {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 0.5rem;
   background: #fff;
-  border: 1px solid #e9ecef;
-  border-radius: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   padding: 0.75rem 1rem;
   margin-bottom: 1rem;
 }
@@ -31,119 +33,138 @@
   font-weight: 600;
 }
 
+/* ========== Form spacing (card/inputs come from AuthForm) ========== */
 .form {
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
-  background: #fff;
-  border: 1px solid #e9ecef;
-  border-radius: 10px;
-  padding: 1rem;
-}
-.form input {
-  width: 100%;
-  min-height: 44px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 0.55rem 0.65rem;
-  font-size: 1rem;
-}
-.form input:focus {
-  outline: none;
-  border-color: #007bff;
 }
 
-/* --- Participants header row --- */
+/* ========== Participants header row ========== */
 .participantsHeader {
   display: flex;
   align-items: center;
-  justify-content: space-between; /* label left, actions right */
-  margin-top: 0.25rem;
-  margin-bottom: 0.4rem;
+  justify-content: space-between;
   gap: 0.5rem;
+  margin: 0.25rem 0 0.4rem;
+  min-width: 0; /* prevent overflow in tight layouts */
 }
 .sectionLabel {
   font-weight: 700;
   color: #1f2937;
 }
+
 .participantActions {
   display: flex;
   gap: 0.5rem;
+  flex-wrap: wrap; /* allow wrapping on small screens */
 }
 
-/* utility buttons beside labels */
+/* Utility buttons next to the label */
 .toolBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.45rem 0.8rem;
-  font-size: 1rem; /* match main buttons */
+  padding: 0.6rem 1rem;
+  font-size: 1.125rem; /* ~18px */
   font-weight: 600;
-  min-height: 36px;
-  border-radius: 6px;
+  min-height: var(--tap); /* comfy tap target */
+  border-radius: 8px;
   cursor: pointer;
-  border: 1px solid #007bff;
-  background: #007bff;
+  border: 1px solid var(--primary);
+  background: var(--primary);
   color: #fff;
   transition: background 0.15s ease-in-out, transform 0.05s ease-in-out;
 }
 .toolBtn:hover {
-  background: #005ed1;
+  background: var(--primary-hover);
 }
 .toolBtn:active {
   transform: translateY(1px);
 }
+.toolBtn:focus-visible {
+  outline: 2px solid #80bfff;
+  outline-offset: 2px;
+}
 
-/* members grid */
+/* ========== Members grid ========== */
 .membersGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); /* was 180px */
   gap: 0.5rem;
   margin-bottom: 0.25rem;
+  min-width: 0; /* allow container to shrink */
 }
 .memberChip {
   display: flex;
-  gap: 0.5rem;
   align-items: center;
-  border: 1px solid #e9ecef;
-  background: #fff;
-  border-radius: 8px;
+  gap: 0.5rem;
   padding: 0.5rem 0.6rem;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
   cursor: pointer;
   user-select: none;
+  min-width: 0; /* key inside grid */
+}
+.memberChip span {
+  min-width: 0;
+  overflow-wrap: anywhere; /* wrap long names */
+  word-break: break-word; /* fallback */
+  line-height: 1.25;
 }
 .memberChip input[type="checkbox"] {
   width: 18px;
   height: 18px;
 }
+/* visible focus when tabbing to the checkbox */
+.memberChip:focus-within {
+  outline: 2px solid #80bfff;
+  outline-offset: 2px;
+}
 
-/* section title for Split */
+/* ========== Split section ========== */
 .sectionHeader {
   font-weight: 700;
   color: #1f2937;
   margin-top: 0.6rem;
 }
 
-/* split tabs */
 .splitTabs {
   display: flex;
   gap: 0.5rem;
+  align-items: stretch;
+  min-width: 0; /* avoid overflow with long text */
 }
 .tab {
+  flex: 1 1 0; /* equal width */
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  border: 1px solid #e5e7eb;
+  justify-content: center;
+  gap: 0.5rem;
+
+  padding: 0.6rem 0.9rem;
+  font-size: 1.125rem; /* bigger text */
+  min-height: var(--tap); /* comfy tap target */
+
+  border: 1px solid var(--border);
   background: #f9fafb;
-  border-radius: 8px;
-  padding: 0.45rem 0.6rem;
+  border-radius: 10px;
   cursor: pointer;
+  min-width: 0;
 }
 .tab input {
-  accent-color: #007bff;
+  width: 1.1em;
+  height: 1.1em;
+  accent-color: var(--primary);
+}
+/* keyboard focus */
+.tab:focus-within {
+  outline: 2px solid #80bfff;
+  outline-offset: 2px;
 }
 
-/* even preview */
+/* ========== Even preview ========== */
 .previewBox {
   margin-top: 0.25rem;
   border: 1px dashed #cfd8e3;
@@ -174,7 +195,7 @@
   font-weight: 600;
 }
 
-/* manual table */
+/* ========== Manual split table ========== */
 .manualTable {
   margin-top: -0.25rem;
 }
@@ -188,25 +209,22 @@
 .manualName {
   color: #333;
 }
+
 .manualInputWrap {
   display: flex;
   align-items: center;
   gap: 0.35rem;
 }
-.manualInputWrap input {
+.manualInput {
   flex: 1;
   min-width: 0;
-  min-height: 44px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 0.55rem 0.65rem;
-  font-size: 1rem;
 }
+
 .ccyBadge {
   font-size: 0.85rem;
   color: #444;
   background: #f3f4f6;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   padding: 0.35rem 0.45rem;
   border-radius: 6px;
 }
@@ -214,7 +232,7 @@
   margin-top: 0.5rem;
 }
 
-/* alerts */
+/* ========== Alerts ========== */
 .alertError {
   background: #fde8e8;
   border: 1px solid #f8b4b4;
@@ -233,46 +251,40 @@
   color: #666;
 }
 
-/* buttons */
+/* ========== Action buttons (compose with authStyles.button) ========== */
 .actions {
   display: flex;
   gap: 0.75rem;
   margin-top: 0.25rem;
+  flex-wrap: wrap; /* allow wrapping */
+  align-items: stretch;
 }
-.primaryBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.6rem 0.9rem;
-  min-height: 44px;
-  font-size: 1rem;
-  font-weight: 600;
-  border-radius: 8px;
-  border: 1px solid #007bff;
-  background: #007bff;
+.actions button {
+  width: auto !important; /* override shared 100% width */
+  min-width: 0;
+  flex: 1 1 calc(50% - 0.375rem); /* two-up with gap */
+}
+.actions button:only-child {
+  flex-basis: 100%;
+}
+
+.successBtn {
+  border: 1px solid #1e7e34;
+  background: #1e7e34;
   color: #fff;
-  cursor: pointer;
 }
-.primaryBtn:hover {
-  background: #005ed1;
+.successBtn:hover {
+  background: #155724;
 }
-.primaryBtn:disabled {
+.successBtn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
+
 .secondaryBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.6rem 0.9rem;
-  min-height: 44px;
-  font-size: 1rem;
-  font-weight: 600;
-  border-radius: 8px;
   border: 1px solid #ced4da;
   background: #f8f9fa;
   color: #333;
-  cursor: pointer;
 }
 .secondaryBtn:hover {
   background: #e9ecef;
@@ -287,63 +299,56 @@
   text-align: center;
 }
 
-/* responsive tweak: keep header compact but wrap nicely */
-@media (max-width: 520px) {
-  .manualRow {
-    grid-template-columns: 1fr;
-  }
-  .participantsHeader {
-    flex-wrap: wrap;
-  }
-  .participantActions {
-    margin-left: auto;
-  }
-}
-
-.successBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.6rem 0.9rem;
-  min-height: 44px;
-  font-size: 1rem;
-  font-weight: 600;
-  border-radius: 8px;
-  border: 1px solid #1e7e34;
-  background: #1e7e34; /* dark green */
-  color: #fff;
-  cursor: pointer;
-}
-.successBtn:hover {
-  background: #155724; /* darker on hover */
-}
-.successBtn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.bottomNav {
-  margin-top: 2rem;
-  text-align: left;
-}
-
-/* payer block */
+/* ========== Payer select ========== */
 .payerBlock {
   display: grid;
   grid-template-columns: 1fr;
   gap: 0.4rem;
 }
 
-.select {
-  width: 100%;
-  min-height: 44px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 0.55rem 0.65rem;
-  font-size: 1rem;
-  background: #fff;
+/* ========== Responsive ========== */
+@media (max-width: 520px) {
+  .manualRow {
+    grid-template-columns: 1fr;
+  }
+
+  .participantsHeader {
+    flex-wrap: wrap;
+  }
+
+  .participantActions {
+    margin-left: 0; /* don't push off-screen */
+    width: 100%; /* own full line under label */
+    justify-content: flex-start;
+  }
+  .participantActions .toolBtn {
+    /* two equal buttons per row */
+    flex: 1 1 calc(50% - 0.25rem);
+  }
+
+  .splitTabs {
+    flex-wrap: wrap;
+  }
+  .tab {
+    flex: 1 1 100%;
+  } /* stack tabs, full width */
+
+  .membersGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
-.select:focus {
-  outline: none;
-  border-color: #007bff;
+
+@media (max-width: 420px) {
+  .actions button {
+    flex: 1 1 100%;
+  } /* stack action buttons */
+}
+
+@media (max-width: 360px) {
+  .participantActions .toolBtn {
+    flex: 1 1 100%;
+  } /* stack tools */
+  .membersGrid {
+    grid-template-columns: 1fr;
+  } /* single column chips */
 }

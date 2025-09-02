@@ -4,8 +4,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { LinkRow } from "../components/LinkRow";
 import styles from "./NewExpense.module.css";
+import authStyles from "./AuthForm.module.css"; // <-- reuse shared form/input/button
 
-// Getting directly from token -> stores id
 function decodeJwtUserId(token) {
   try {
     const part = token.split(".")[1];
@@ -26,27 +26,25 @@ export default function NewExpense() {
   const navigate = useNavigate();
 
   const [trip, setTrip] = useState(null);
-  const [members, setMembers] = useState([]); // {user_id, full_name}
+  const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
 
   const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState(""); // decimal string
+  const [amount, setAmount] = useState("");
   const [splitMode, setSplitMode] = useState("equal"); // "equal" | "manual"
-  const [selected, setSelected] = useState({}); // user_id:boolean
-  const [manual, setManual] = useState({}); // user_id: "12.34" (string)
-  const [payerId, setPayerId] = useState(null); // NEW: who paid first
+  const [selected, setSelected] = useState({});
+  const [manual, setManual] = useState({});
+  const [payerId, setPayerId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [msg, setMsg] = useState("");
 
   const token = localStorage.getItem("token");
-  // useMemo useful cos of constant form changes
   const authedUserId = useMemo(
     () => (token ? decodeJwtUserId(token) : null),
     [token]
   );
 
-  // Parse decimal string to integer cents
   const parseCents = (s) => {
     if (!s) return null;
     const n = Number(String(s).replace(/[^0-9.]/g, ""));
@@ -62,23 +60,17 @@ export default function NewExpense() {
         const jwt = localStorage.getItem("token");
         const tripRes = await axios.get(
           `http://localhost:5000/trips/${tripId}`,
-          {
-            headers: { Authorization: `Bearer ${jwt}` },
-          }
+          { headers: { Authorization: `Bearer ${jwt}` } }
         );
         setTrip(tripRes.data.trip);
 
-        // expects: { members: [{ user_id, full_name }] }
         const memRes = await axios.get(
           `http://localhost:5000/trips/${tripId}/members`,
-          {
-            headers: { Authorization: `Bearer ${jwt}` },
-          }
+          { headers: { Authorization: `Bearer ${jwt}` } }
         );
         const mems = memRes.data?.members || [];
         setMembers(mems);
 
-        // default: everyone selected
         const initSel = {};
         const initManual = {};
         mems.forEach((m) => {
@@ -88,12 +80,8 @@ export default function NewExpense() {
         setSelected(initSel);
         setManual(initManual);
 
-        // Default payer: authed user if present among selected
-        if (authedUserId && initSel[authedUserId]) {
-          setPayerId(authedUserId);
-        } else {
-          setPayerId(null);
-        }
+        if (authedUserId && initSel[authedUserId]) setPayerId(authedUserId);
+        else setPayerId(null);
       } catch {
         setErr("Failed to load trip or members");
       } finally {
@@ -107,13 +95,10 @@ export default function NewExpense() {
     [members, selected]
   );
 
-  // Keep payer valid relative to currently selected participants
   useEffect(() => {
     if (payerId && !selectedIds.includes(payerId)) {
-      // current payer no longer selected -> clear
       setPayerId(null);
     } else if (!payerId && authedUserId && selectedIds.includes(authedUserId)) {
-      // no payer chosen but authed user is selected -> default to authed user
       setPayerId(authedUserId);
     }
   }, [selectedIds, payerId, authedUserId]);
@@ -145,9 +130,7 @@ export default function NewExpense() {
 
   const toggleAll = (val) => {
     const next = {};
-    members.forEach((m) => {
-      next[m.user_id] = val;
-    });
+    members.forEach((m) => (next[m.user_id] = val));
     setSelected(next);
   };
 
@@ -162,7 +145,6 @@ export default function NewExpense() {
       return setErr("Enter a valid amount greater than 0");
     if (selectedIds.length === 0)
       return setErr("Select at least one participant");
-
     if (!payerId) return setErr("Please select who paid");
     if (!selectedIds.includes(payerId))
       return setErr("Payer must be one of the selected participants");
@@ -171,17 +153,16 @@ export default function NewExpense() {
       setSubmitting(true);
       const jwt = localStorage.getItem("token");
 
-      let body = {
+      const body = {
         description: desc,
         amount_cents: amountCents,
         currency_code: trip?.currency_code,
         split_mode: splitMode,
-        paid_by_user_id: payerId, // <-- use chosen payer
+        paid_by_user_id: payerId,
       };
 
       if (splitMode === "equal") {
         body.participants = selectedIds;
-        // or send exact shares: body.shares = evenShares;
       } else {
         const shares = selectedIds.map((uid) => ({
           user_id: uid,
@@ -214,7 +195,6 @@ export default function NewExpense() {
   if (err && !trip) return <p className={styles.error}>{err}</p>;
   if (!trip) return <p className={styles.empty}>Trip not found</p>;
 
-  // Helper to get a member name
   const nameFor = (uid) =>
     members.find((m) => m.user_id === uid)?.full_name || `User ${uid}`;
 
@@ -233,11 +213,13 @@ export default function NewExpense() {
         </div>
       </div>
 
-      <form className={styles.form} onSubmit={onSubmit}>
+      {/* Use shared form card + page-specific spacing */}
+      <form className={`${authStyles.form} ${styles.form}`} onSubmit={onSubmit}>
         <label htmlFor="desc">Description</label>
         <input
           id="desc"
           type="text"
+          className={authStyles.input}
           placeholder="e.g. Dinner at Ichiran"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -248,17 +230,17 @@ export default function NewExpense() {
         <input
           id="amount"
           type="number"
+          className={authStyles.input}
           inputMode="decimal"
           step="0.01"
           min="0"
           placeholder="0.00"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          onWheel={(e) => e.currentTarget.blur()} // prevent scroll changes
+          onWheel={(e) => e.currentTarget.blur()}
           required
         />
 
-        {/* Participants header: label left, actions right */}
         <div className={styles.participantsHeader}>
           <label htmlFor="participants" className={styles.sectionLabel}>
             Participants
@@ -299,14 +281,13 @@ export default function NewExpense() {
           ))}
         </div>
 
-        {/* NEW: Payer selection (from selected participants) */}
         <div className={styles.payerBlock}>
           <label htmlFor="payer" className={styles.sectionLabel}>
             Paid by
           </label>
           <select
             id="payer"
-            className={styles.select}
+            className={authStyles.input}
             value={payerId ?? ""}
             onChange={(e) =>
               setPayerId(e.target.value ? Number(e.target.value) : null)
@@ -327,7 +308,6 @@ export default function NewExpense() {
           </select>
         </div>
 
-        {/* Split mode */}
         <div className={styles.sectionHeader}>Split</div>
         <div className={styles.splitTabs}>
           <label className={styles.tab}>
@@ -352,7 +332,6 @@ export default function NewExpense() {
           </label>
         </div>
 
-        {/* Even preview */}
         {splitMode === "equal" &&
           amountCents != null &&
           selectedIds.length > 0 && (
@@ -373,7 +352,6 @@ export default function NewExpense() {
             </div>
           )}
 
-        {/* Manual inputs */}
         {splitMode === "manual" && (
           <div className={styles.manualTable}>
             {selectedIds.length === 0 ? (
@@ -391,6 +369,7 @@ export default function NewExpense() {
                       step="0.01"
                       min="0"
                       placeholder="0.00"
+                      className={`${authStyles.input} ${styles.manualInput}`}
                       value={manual[uid] ?? ""}
                       onChange={(e) =>
                         setManual((prev) => ({
@@ -398,7 +377,7 @@ export default function NewExpense() {
                           [uid]: e.target.value,
                         }))
                       }
-                      onWheel={(e) => e.currentTarget.blur()} // prevent scroll changes
+                      onWheel={(e) => e.currentTarget.blur()}
                     />
                     <div className={styles.ccyBadge}>{trip.currency_code}</div>
                   </div>
@@ -428,7 +407,7 @@ export default function NewExpense() {
         <div className={styles.actions}>
           <button
             type="submit"
-            className={styles.successBtn}
+            className={`${authStyles.button} ${styles.successBtn}`}
             disabled={
               submitting ||
               (splitMode === "manual" && manualMismatch) ||
@@ -440,7 +419,7 @@ export default function NewExpense() {
           </button>
           <button
             type="button"
-            className={styles.secondaryBtn}
+            className={`${authStyles.button} ${styles.secondaryBtn}`}
             onClick={() => navigate(`/trips/${tripId}`)}
           >
             Cancel

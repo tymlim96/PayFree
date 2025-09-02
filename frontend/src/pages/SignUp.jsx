@@ -30,31 +30,12 @@ export default function SignUp() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Check minimum length
-    // if (isPasswordShort) {
-    //   setMsg(`Password must be at least ${minPasswordLen} characters`);
-    //   setStatus("error");
-    //   return;
-    // }
-
-    // Confirm passwords match
-    // if (!passwordsMatch) {
-    //   setMsg("Password do not match");
-    //   setStatus("error");
-    //   return;
-    // }
-
-    // Sign up submit
     try {
-      // POST request
       const res = await axios.post("http://localhost:5000/auth/signup", {
         email,
         password,
         fullName,
       });
-
-      // res.data is always needed
       navigate("/login", {
         state: { msg: `Signed up: ${res.data.user.email}` },
       });
@@ -68,8 +49,9 @@ export default function SignUp() {
     <div className={styles.container}>
       <h2 className={styles.title}>Sign up</h2>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className={styles.form}>
         <input
+          className={styles.input}
           type="text"
           placeholder="Full Name"
           value={fullName}
@@ -78,6 +60,7 @@ export default function SignUp() {
         />
 
         <input
+          className={styles.input}
           type="email"
           placeholder="you@example.com"
           value={email}
@@ -86,9 +69,11 @@ export default function SignUp() {
         />
 
         <input
-          className={isPasswordShort ? styles.inputError : ""}
+          className={`${styles.input} ${
+            isPasswordShort ? styles.inputError : ""
+          }`}
           type="password"
-          placeholder="Password"
+          placeholder={`Password (min ${minPasswordLen})`}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           minLength={minPasswordLen}
@@ -97,7 +82,7 @@ export default function SignUp() {
         />
 
         <input
-          className={`${
+          className={`${styles.input} ${
             confirmPassword && !passwordsMatch ? styles.inputError : ""
           }`}
           type="password"
@@ -108,7 +93,6 @@ export default function SignUp() {
           required
         />
 
-        {/* Live feedback */}
         {isPasswordShort && (
           <Alert type="error">
             Password must be at least {minPasswordLen} characters
@@ -120,18 +104,20 @@ export default function SignUp() {
             {passwordsMatch ? "Passwords match" : "Passwords do not match"}
           </Alert>
         )}
-        {/* Still needed in case of Signup error */}
+
         {msg && (
           <Alert type={status === "error" ? "error" : "success"}>{msg}</Alert>
         )}
+
         <button
           type="submit"
-          className={`${!formValid ? "disabled" : ""}`}
+          className={`${styles.button}`}
           disabled={!formValid}
         >
           Sign up
         </button>
       </form>
+
       <LinkRow to="/login">← Back to Login</LinkRow>
     </div>
   );

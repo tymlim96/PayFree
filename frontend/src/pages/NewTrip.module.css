@@ -73,13 +73,13 @@
 
 /* Orange primary action */
 .actionPrimary {
-  border: 1px solid #e67e22;
-  background: #e67e22;
+  background: #d35400; /* darker orange for better contrast */
+  border-color: #d35400;
   color: #fff;
 }
 .actionPrimary:hover {
-  background: #ca6f1e;
-  border-color: #ca6f1e;
+  background: #a84300; /* deeper orange on hover */
+  border-color: #a84300;
 }
 
 .actionSecondary {

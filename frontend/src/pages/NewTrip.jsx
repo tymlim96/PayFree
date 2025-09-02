@@ -5,7 +5,8 @@ import axios from "axios";
 import Alert from "../components/Alert/Alert";
 import { LinkRow } from "../components/LinkRow";
 import { CURRENCIES } from "../constants/currencies";
-import styles from "./NewTrip.module.css";
+import tripStyles from "./NewTrip.module.css";
+import authStyles from "./AuthForm.module.css";
 
 export default function NewTrip() {
   const navigate = useNavigate();
@@ -22,7 +23,6 @@ export default function NewTrip() {
 
   const copyBtnRef = useRef(null);
 
-  // Jump by first letter of CODE (press "S" to jump to first code starting with S)
   const onFirstLetterByCode = (e) => {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.key.length !== 1) return;
@@ -56,7 +56,6 @@ export default function NewTrip() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Success: hide form and show invite only
       setMsg("Trip created! Share this invite link to add members:");
       setStatus("success");
       setInviteUrl(res.data?.invite_url || "");
@@ -70,7 +69,6 @@ export default function NewTrip() {
     }
   };
 
-  // Move focus to Copy after invite shows
   useEffect(() => {
     if (inviteUrl && copyBtnRef.current) {
       copyBtnRef.current.focus();
@@ -83,13 +81,13 @@ export default function NewTrip() {
         {inviteUrl ? "Invite Members" : "New Trip"}
       </h2>
 
-      {/* ONLY render the form when there is no invite yet */}
       {!inviteUrl && (
-        <form onSubmit={onSubmit}>
+        <form onSubmit={onSubmit} className={authStyles.form}>
           <label htmlFor="trip_name">Trip Name</label>
           <input
             id="trip_name"
             type="text"
+            className={authStyles.input}
             placeholder="e.g. Japan Winter 2025"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -99,17 +97,11 @@ export default function NewTrip() {
           <label htmlFor="trip_currency">Currency</label>
           <select
             id="trip_currency"
+            className={authStyles.input}
             value={currency}
             onChange={(e) => setCurrency(e.target.value)}
             onKeyDown={onFirstLetterByCode}
             required
-            style={{
-              minHeight: 44,
-              borderRadius: 4,
-              border: "1px solid #ccc",
-              padding: "0.5rem",
-              fontSize: "1rem",
-            }}
           >
             {CURRENCIES.map((c) => (
               <option key={c.code} value={c.code}>
@@ -122,10 +114,10 @@ export default function NewTrip() {
             <Alert type={status === "error" ? "error" : "success"}>{msg}</Alert>
           )}
 
-          <div className={styles.formActions}>
+          <div className={tripStyles.formActions}>
             <button
               type="submit"
-              className={`${styles.actionBtn} ${styles.createBtn}`}
+              className={`${authStyles.button} ${tripStyles.actionBtn} ${tripStyles.createBtn}`}
               disabled={submitting}
             >
               {submitting ? "Creating…" : "Create Trip"}
@@ -134,7 +126,7 @@ export default function NewTrip() {
             <button
               type="button"
               onClick={() => navigate("/trips")}
-              className={`${styles.actionBtn} ${styles.actionSecondary}`}
+              className={`${authStyles.button} ${tripStyles.actionBtn} ${tripStyles.actionSecondary}`}
             >
               Cancel
             </button>
@@ -142,21 +134,20 @@ export default function NewTrip() {
         </form>
       )}
 
-      {/* Invite-only view (form hidden) */}
       {inviteUrl && (
         <>
           {msg && (
             <Alert type={status === "error" ? "error" : "success"}>{msg}</Alert>
           )}
 
-          <div className={styles.inviteCard}>
-            <h3 className={styles.inviteHeader}>Invite Link</h3>
+          <div className={tripStyles.inviteCard}>
+            <h3 className={tripStyles.inviteHeader}>Invite Link</h3>
 
-            <div className={styles.inviteRow}>
-              <code className={styles.inviteCode}>{inviteUrl}</code>
+            <div className={tripStyles.inviteRow}>
+              <code className={tripStyles.inviteCode}>{inviteUrl}</code>
               <button
                 type="button"
-                className={styles.copyBtn}
+                className={tripStyles.copyBtn}
                 ref={copyBtnRef}
                 onClick={async () => {
                   try {
@@ -170,15 +161,15 @@ export default function NewTrip() {
               </button>
             </div>
 
-            <div className={styles.helper}>
+            <div className={tripStyles.helper}>
               Share this link to add members. It never expires and can be used
               unlimited times.
             </div>
 
-            <div className={styles.actionRow}>
+            <div className={tripStyles.actionRow}>
               <button
                 type="button"
-                className={styles.actionPrimary}
+                className={`${authStyles.button} ${tripStyles.actionPrimary}`}
                 style={{ width: "100%" }}
                 onClick={() =>
                   navigate(

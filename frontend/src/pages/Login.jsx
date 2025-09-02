@@ -17,12 +17,9 @@ export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  // Flash message
   useEffect(() => {
     if (flashMsg) {
-      // Timer to clear flashMsg
       const timer = setTimeout(() => setFlashMsg(""), 3000);
-      // Function for cleanup
       return () => clearTimeout(timer);
     }
   }, [flashMsg]);
@@ -30,13 +27,10 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Upon success -> gives a token in res
       const res = await axios.post("http://localhost:5000/auth/login", {
         email,
         password,
       });
-
-      // Set AuthContext global variables
       await login(res.data.token);
       setMsg("Logged in successfully");
       setStatus("success");
@@ -52,8 +46,9 @@ export default function Login() {
       <h2 className={styles.title}>Login</h2>
       {flashMsg && <Alert type="success">{flashMsg}</Alert>}
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className={styles.form}>
         <input
+          className={styles.input}
           type="email"
           placeholder="you@example.com"
           value={email}
@@ -62,32 +57,36 @@ export default function Login() {
         />
 
         <input
+          className={styles.input}
           type="password"
           placeholder="••••••"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
         />
+
         {msg && (
           <Alert type={status === "error" ? "error" : "success"}>{msg}</Alert>
         )}
-        <button type="submit">Login</button>
+
+        <button type="submit" className={styles.button}>
+          Login
+        </button>
       </form>
+
       <LinkRowSplit
         left={<Link to="/reset-password">Forgot password?</Link>}
         right={<Link to="/signup">Sign up!</Link>}
       />
-      {/* Divider */}
+
       <div className={styles.divider}>or</div>
 
-      {/* Continue with Google */}
       <a
         href="http://localhost:5000/auth/google" // prod: https://api.payfree.live/auth/google
         className={styles.googleBtn}
         aria-label="Continue with Google"
       >
         <span className={styles.googleIcon} aria-hidden="true">
-          {/* Multicolor Google "G" SVG */}
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 533.5 544.3">
             <path
               fill="#4285F4"
