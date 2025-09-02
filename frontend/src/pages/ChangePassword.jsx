@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Alert from "../components/Alert/Alert";
 import { LinkRow } from "../components/LinkRow";
-import styles from "./AuthForm.module.css";
+import styles from "./Form.module.css";
 import { usePolicy } from "../contexts/PolicyContext";
 import { useAuth } from "../contexts/AuthContext";
 

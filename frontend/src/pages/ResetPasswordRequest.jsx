@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import Alert from "../components/Alert/Alert";
 import { LinkRow } from "../components/LinkRow";
-import styles from "./AuthForm.module.css";
+import styles from "./Form.module.css";
 
 export default function ResetPasswordRequest() {
   const [email, setEmail] = useState("");

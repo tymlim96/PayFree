@@ -113,7 +113,6 @@ export default function SettleDebts() {
               <li key={c.user_id} className={styles.item}>
                 <div className={`${styles.row} ${styles.creditRow}`}>
                   <div className={styles.person}>
-                    <div className={styles.avatar} aria-hidden />
                     <div className={styles.name}>
                       {c.full_name || `User ${c.user_id}`}
                     </div>

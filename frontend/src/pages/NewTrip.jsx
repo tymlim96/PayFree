@@ -6,7 +6,7 @@ import Alert from "../components/Alert/Alert";
 import { LinkRow } from "../components/LinkRow";
 import { CURRENCIES } from "../constants/currencies";
 import tripStyles from "./NewTrip.module.css";
-import authStyles from "./AuthForm.module.css";
+import formStyles from "./Form.module.css";
 
 export default function NewTrip() {
   const navigate = useNavigate();
@@ -82,12 +82,12 @@ export default function NewTrip() {
       </h2>
 
       {!inviteUrl && (
-        <form onSubmit={onSubmit} className={authStyles.form}>
+        <form onSubmit={onSubmit} className={formStyles.form}>
           <label htmlFor="trip_name">Trip Name</label>
           <input
             id="trip_name"
             type="text"
-            className={authStyles.input}
+            className={formStyles.input}
             placeholder="e.g. Japan Winter 2025"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -97,7 +97,7 @@ export default function NewTrip() {
           <label htmlFor="trip_currency">Currency</label>
           <select
             id="trip_currency"
-            className={authStyles.input}
+            className={formStyles.input}
             value={currency}
             onChange={(e) => setCurrency(e.target.value)}
             onKeyDown={onFirstLetterByCode}
@@ -117,7 +117,7 @@ export default function NewTrip() {
           <div className={tripStyles.formActions}>
             <button
               type="submit"
-              className={`${authStyles.button} ${tripStyles.actionBtn} ${tripStyles.createBtn}`}
+              className={`${formStyles.button} ${tripStyles.actionBtn} ${tripStyles.createBtn}`}
               disabled={submitting}
             >
               {submitting ? "Creating…" : "Create Trip"}
@@ -126,7 +126,7 @@ export default function NewTrip() {
             <button
               type="button"
               onClick={() => navigate("/trips")}
-              className={`${authStyles.button} ${tripStyles.actionBtn} ${tripStyles.actionSecondary}`}
+              className={`${formStyles.button} ${tripStyles.actionBtn} ${tripStyles.actionSecondary}`}
             >
               Cancel
             </button>
@@ -169,7 +169,7 @@ export default function NewTrip() {
             <div className={tripStyles.actionRow}>
               <button
                 type="button"
-                className={`${authStyles.button} ${tripStyles.actionPrimary}`}
+                className={`${formStyles.button} ${tripStyles.actionPrimary}`}
                 style={{ width: "100%" }}
                 onClick={() =>
                   navigate(

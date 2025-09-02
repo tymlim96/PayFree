@@ -4,7 +4,6 @@
   margin: 2rem auto;
   padding: 0 1rem;
 }
-
 .title {
   margin: 0 0 0.75rem 0;
   color: #333;
@@ -15,28 +14,24 @@
 .section {
   margin-top: 1rem;
 }
-
 .sectionHead {
   display: flex;
   align-items: baseline;
   gap: 0.75rem;
   margin-bottom: 0.5rem;
 }
-
 .sectionTitle {
   margin: 0;
   color: #1f2937;
   text-align: left;
 }
-
 .totalDebt {
   font-weight: 700;
-  color: #b02a37; /* match .amountOwe (red) */
+  color: #b02a37;
 }
-
 .totalCredit {
   font-weight: 700;
-  color: #1e7e34; /* match .amountGet (green) */
+  color: #1e7e34;
 }
 
 /* ===== Lists ===== */
@@ -45,27 +40,40 @@
   margin: 0;
   padding: 0;
 }
-
 .item {
   margin-bottom: 0.6rem;
 }
 
-/* Row base */
+/* Row base (used for <button> and <div>) */
 .row {
   width: 100%;
   display: flex;
   justify-content: space-between;
-  gap: 0.75rem;
   align-items: center;
-  border-radius: 10px;
+  gap: 0.75rem;
   padding: 0.9rem 1rem;
+  border-radius: 10px;
   border: 1px solid transparent;
+
+  /* important for small screens / long names */
+  min-width: 0;
+  text-align: left;
+  -webkit-appearance: none;
+  appearance: none;
+  background: none;
+}
+.row > * {
+  min-width: 0;
+} /* children can shrink/wrap */
+.row:focus-visible {
+  outline: 2px solid #80bfff;
+  outline-offset: 2px;
 }
 
-/* Clickable debts (orange accent, similar to your Trips list) */
+/* Clickable debts (orange accent) */
 .debtRow {
-  background: #fff8f0; /* very light orange */
-  border: 1px solid #ffe0b3; /* soft orange border */
+  background: #fff8f0;
+  border: 1px solid #ffe0b3;
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s, transform 0.02s ease-in-out;
 }
@@ -77,10 +85,10 @@
   transform: scale(0.998);
 }
 
-/* Read-only credits (green accent like expenses) */
+/* Read-only credits (green accent) */
 .creditRow {
-  background: #f4fdf7; /* super light green */
-  border: 1px solid #d2f1dc; /* subtle green border */
+  background: #f4fdf7;
+  border: 1px solid #d2f1dc;
 }
 
 /* Person block */
@@ -88,24 +96,29 @@
   display: flex;
   align-items: center;
   gap: 0.6rem;
+  min-width: 0;
 }
-
 .name {
   font-weight: 600;
   color: #1f2937;
-  font-size: 1.05rem;
+  font-size: 1.1rem;
+  min-width: 0;
+  overflow-wrap: anywhere; /* wrap long names */
 }
 
-/* Amounts */
-.amountOwe {
-  font-weight: 700;
-  color: #b02a37; /* red-ish: money leaving you */
-  font-size: 1.1rem;
-}
+/* Amounts pinned to the right, no wrap */
+.amountOwe,
 .amountGet {
   font-weight: 700;
-  color: #1e7e34; /* dark green: money coming in */
   font-size: 1.1rem;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+.amountOwe {
+  color: #b02a37;
+}
+.amountGet {
+  color: #1e7e34;
 }
 
 /* States */
@@ -128,4 +141,11 @@
 /* Spacing */
 .bottomNav {
   margin-top: 3rem;
+}
+
+/* Small tweaks on narrow screens */
+@media (max-width: 520px) {
+  .row {
+    padding: 0.8rem 0.9rem;
+  }
 }

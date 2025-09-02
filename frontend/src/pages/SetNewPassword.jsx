@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import Alert from "../components/Alert/Alert";
 import { LinkRow } from "../components/LinkRow";
 import { usePolicy } from "../contexts/PolicyContext";
-import styles from "./AuthForm.module.css";
+import styles from "./Form.module.css";
 
 export default function SetNewPassword() {
   const { minPasswordLen } = usePolicy();

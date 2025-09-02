@@ -1,3 +1,4 @@
+/* ========== Layout ========== */
 .container {
   max-width: 720px;
   margin: 2rem auto;
@@ -15,8 +16,10 @@
   border-radius: 12px;
   padding: 1rem 1.1rem;
   box-shadow: 0 2px 10px rgba(16, 24, 40, 0.04);
+  min-width: 0; /* allow children to shrink */
 }
 
+/* ========== Summary ========== */
 .summary {
   font-size: 1.1rem;
   font-weight: 600;
@@ -29,6 +32,7 @@
   font-size: 1.2rem;
 }
 
+/* ========== Form ========== */
 .form {
   margin-top: 0.5rem;
 }
@@ -38,13 +42,17 @@
   color: #333;
   margin-bottom: 0.35rem;
 }
+
+/* Inputs (amount + confirm) */
 .input {
   width: 100%;
+  box-sizing: border-box;
   padding: 0.6rem 0.7rem;
   border: 1px solid #e9ecef;
   border-radius: 8px;
   margin-bottom: 0.75rem;
-  font-size: 1rem;
+  font-size: 1.125rem; /* chosen size */
+  min-height: 44px;
 }
 .input:focus {
   outline: none;
@@ -52,6 +60,7 @@
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
+/* Optional helper text row */
 .helpers {
   display: flex;
   align-items: center;
@@ -63,32 +72,39 @@
   font-size: 0.9rem;
 }
 
+/* ========== Buttons ========== */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0.6rem 0.9rem;
-  font-size: clamp(1rem, 1.8vw, 1.1rem);
-  line-height: 1;
+  font-size: 1.125rem;
+  line-height: 1; /* overridden in confirm row for nicer wrapping */
   min-height: 44px;
   border-radius: 8px;
   border: 1px solid transparent;
   cursor: pointer;
   font-weight: 600;
-  white-space: nowrap;
+  white-space: nowrap; /* default elsewhere; relaxed in confirm row */
+}
+.btn:focus-visible {
+  outline: 2px solid #80bfff;
+  outline-offset: 2px;
 }
 
+/* Primary (orange) */
 .payBtn {
-  background: #d35400; /* darker orange for better contrast */
+  background: #d35400;
   border-color: #d35400;
   color: #fff;
-  width: 100%;
+  width: 100%; /* full-width for first step */
 }
 .payBtn:hover {
-  background: #a84300; /* deeper orange on hover */
+  background: #a84300;
   border-color: #a84300;
 }
 
+/* Secondary (gray) */
 .secondaryBtn {
   background: #f8f9fa;
   border: 1px solid #ced4da;
@@ -98,6 +114,7 @@
   background: #e9ecef;
 }
 
+/* ========== Confirm block ========== */
 .confirmCard {
   border: 1px solid #ffe5e7;
   background: #fff5f6;
@@ -105,22 +122,60 @@
   padding: 0.9rem 1rem;
   width: 100%;
   box-sizing: border-box;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr); /* children get 0 min-size */
+  gap: 0.75rem; /* spacing between text, input, buttons */
+  max-width: 100%;
+  min-width: 0; /* prevent overflow */
 }
+
 .confirmText {
-  margin: 0 0 0.5rem 0;
+  margin: 0; /* gap handles spacing */
   color: #5c0a11;
+  overflow-wrap: anywhere; /* wrap long words/amounts */
+  word-break: break-word;
 }
+
 .confirmRow {
   display: flex;
   gap: 0.5rem;
   justify-content: flex-end;
-  flex-wrap: wrap; /* ✅ keep buttons inside on small screens */
-}
-.confirmRow .btn {
-  flex: 1 1 auto; /* ✅ allow shrinking/stacking */
-  min-width: 120px;
+  flex-wrap: wrap; /* key for mid widths */
+  min-width: 0;
 }
 
+/* In confirm row, let labels wrap and share the row */
+.confirmRow .btn {
+  white-space: normal; /* allow wrapping (fixes “Confirm Pay” overflow) */
+  line-height: 1.2;
+  text-align: center;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+
+  flex: 1 1 12rem; /* equal widths when side-by-side; wrap if tight */
+  min-width: 0;
+}
+
+/* Stop the Pay variant from forcing full-width inside confirm row */
+.confirmRow .payBtn {
+  width: auto !important;
+}
+
+/* If only one button shows, take full row */
+.confirmRow .btn:only-child {
+  flex-basis: 100%;
+}
+
+/* Stack on narrow screens */
+@media (max-width: 520px) {
+  .confirmRow .btn {
+    flex: 1 1 100%;
+  }
+}
+
+/* ========== Misc / States ========== */
 .center {
   text-align: center;
   color: #555;
@@ -138,10 +193,4 @@
 }
 .bottomNav {
   margin-top: 2rem;
-}
-
-@media (max-width: 520px) {
-  .confirmRow .btn {
-    flex: 1 1 100%;
-  }
 }

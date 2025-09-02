@@ -5,29 +5,33 @@
   padding: 0 1rem;
 }
 
-/* Header row: title + button on the same line */
+/* Header row */
 .headerRow {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center; /* vertically align */
   gap: 0.75rem;
   margin-bottom: 1rem;
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
-/* Left-aligned title */
+/* Title */
 .title {
-  text-align: left;
+  margin: 0;
   color: #333;
-  margin: 0; /* remove extra spacing so it centers nicely vertically */
+  text-align: left;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
-/* --- Primary button (same as Account .btn) --- */
+/* Button (content-sized) */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0.6rem 0.9rem;
-  font-size: clamp(1rem, 1.8vw, 1.1rem);
+  font-size: 1.125rem;
   line-height: 1;
   min-height: 44px;
   border-radius: 8px;
@@ -35,19 +39,30 @@
   background: #007bff;
   color: #fff;
   cursor: pointer;
-  white-space: nowrap;
   font-weight: 600;
+
+  flex: 0 0 auto; /* don't grow */
+  max-width: 100%;
+  min-width: 0;
+  white-space: nowrap; /* keep label on one line */
+  margin-left: auto; /* stay right when wrapped */
 }
 .btn:hover {
   background: #005ed1;
 }
+.btn:focus-visible {
+  outline: 2px solid #80bfff;
+  outline-offset: 2px;
+}
+
+/* Orange variant */
 .newTripBtn {
-  background: #d35400; /* darker orange for better contrast */
+  background: #d35400;
   border-color: #d35400;
   color: #fff;
 }
 .newTripBtn:hover {
-  background: #a84300; /* deeper orange on hover */
+  background: #a84300;
   border-color: #a84300;
 }
 
@@ -57,25 +72,27 @@
   margin: 0;
   padding: 0;
 }
-/* Trip list */
 .item {
   display: flex;
   justify-content: space-between;
   gap: 0.75rem;
-  background: #fff8f0; /* very light orange background */
-  border: 1px solid #ffe0b3; /* soft orange border */
+  background: #fff8f0;
+  border: 1px solid #ffe0b3;
   border-radius: 10px;
   padding: 0.9rem 1rem;
   margin-bottom: 0.75rem;
   transition: background 0.2s, border-color 0.2s;
+  min-width: 0;
 }
 .item:hover {
-  background: #fff3e0; /* slightly deeper on hover */
-  border-color: #ffc966; /* stronger orange border on hover */
+  background: #fff3e0;
+  border-color: #ffc966;
 }
 .itemName {
   font-weight: 600;
   color: #333;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .itemMeta {
   color: #666;
@@ -99,9 +116,14 @@
   .item {
     padding: 0.8rem 0.9rem;
   }
+  .headerRow .btn {
+    flex: 0 0 auto; /* ensure no growth */
+    white-space: nowrap; /* keep content-sized */
+    margin-left: auto;
+  }
 }
 
-/* push the bottom nav link down */
+/* Bottom nav spacing */
 .bottomNav {
   margin-top: 3rem;
 }
