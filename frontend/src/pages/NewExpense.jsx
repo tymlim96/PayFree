@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { LinkRow } from "../components/LinkRow";
 import styles from "./NewExpense.module.css";
-import authStyles from "./AuthForm.module.css"; // <-- reuse shared form/input/button
+import formStyles from "./Form.module.css"; // <-- reuse shared form/input/button
 
 function decodeJwtUserId(token) {
   try {
@@ -214,12 +214,12 @@ export default function NewExpense() {
       </div>
 
       {/* Use shared form card + page-specific spacing */}
-      <form className={`${authStyles.form} ${styles.form}`} onSubmit={onSubmit}>
+      <form className={`${formStyles.form} ${styles.form}`} onSubmit={onSubmit}>
         <label htmlFor="desc">Description</label>
         <input
           id="desc"
           type="text"
-          className={authStyles.input}
+          className={formStyles.input}
           placeholder="e.g. Dinner at Ichiran"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -230,7 +230,7 @@ export default function NewExpense() {
         <input
           id="amount"
           type="number"
-          className={authStyles.input}
+          className={formStyles.input}
           inputMode="decimal"
           step="0.01"
           min="0"
@@ -287,7 +287,7 @@ export default function NewExpense() {
           </label>
           <select
             id="payer"
-            className={authStyles.input}
+            className={formStyles.input}
             value={payerId ?? ""}
             onChange={(e) =>
               setPayerId(e.target.value ? Number(e.target.value) : null)
@@ -369,7 +369,7 @@ export default function NewExpense() {
                       step="0.01"
                       min="0"
                       placeholder="0.00"
-                      className={`${authStyles.input} ${styles.manualInput}`}
+                      className={`${formStyles.input} ${styles.manualInput}`}
                       value={manual[uid] ?? ""}
                       onChange={(e) =>
                         setManual((prev) => ({
@@ -407,7 +407,7 @@ export default function NewExpense() {
         <div className={styles.actions}>
           <button
             type="submit"
-            className={`${authStyles.button} ${styles.successBtn}`}
+            className={`${formStyles.button} ${styles.successBtn}`}
             disabled={
               submitting ||
               (splitMode === "manual" && manualMismatch) ||
@@ -419,7 +419,7 @@ export default function NewExpense() {
           </button>
           <button
             type="button"
-            className={`${authStyles.button} ${styles.secondaryBtn}`}
+            className={`${formStyles.button} ${styles.secondaryBtn}`}
             onClick={() => navigate(`/trips/${tripId}`)}
           >
             Cancel

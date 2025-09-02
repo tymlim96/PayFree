@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import styles from "./AuthForm.module.css";
+import styles from "./Form.module.css";
 import Alert from "../components/Alert/Alert";
 import { LinkRow } from "../components/LinkRow";
 import { usePolicy } from "../contexts/PolicyContext";

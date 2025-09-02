@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import axios from "axios";
-import styles from "./AuthForm.module.css";
+import styles from "./Form.module.css";
 import Alert from "../components/Alert/Alert";
 import { LinkRowSplit } from "../components/LinkRow";
 

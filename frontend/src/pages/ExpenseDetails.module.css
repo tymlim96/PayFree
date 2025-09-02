@@ -1,4 +1,6 @@
 /* src/pages/ExpenseDetails.module.css */
+
+/* ========== Layout ========== */
 .container {
   max-width: 720px;
   margin: 2rem auto;
@@ -6,22 +8,24 @@
 }
 .title {
   margin: 0 0 0.75rem 0;
-  color: #333;
+  color: var(--text);
   text-align: left;
 }
 
+/* ========== Detail card ========== */
 .card {
   background: #fff;
-  border: 1px solid #e9ecef;
-  border-radius: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   padding: 1rem;
+  min-width: 0; /* allow inner content to wrap instead of pushing wider */
 }
 .row {
   display: grid;
-  grid-template-columns: 160px 1fr;
+  grid-template-columns: 160px 1fr; /* stable label column */
   gap: 0.75rem;
   padding: 0.35rem 0;
-  border-bottom: 1px dashed #e9ecef;
+  border-bottom: 1px dashed var(--border);
 }
 .row:last-child {
   border-bottom: none;
@@ -33,8 +37,11 @@
 .value {
   color: #111827;
   font-weight: 600;
+  min-width: 0;
+  overflow-wrap: anywhere; /* wrap long strings/IDs */
 }
 
+/* ========== Shares list ========== */
 .sharesBlock {
   margin-top: 1rem;
   border-top: 1px solid #f0f2f5;
@@ -67,63 +74,108 @@
   color: #666;
 }
 
-/* Delete confirm */
+/* ========== Delete confirm ========== */
 .deleteSection {
   margin-top: 1.25rem;
 }
+
 .confirmCard {
+  display: grid;
+  gap: 0.75rem; /* space between text, input, buttons */
   border: 1px solid #ffe5e7;
   background: #fff5f6;
-  border-radius: 10px;
+  border-radius: var(--radius);
   padding: 0.9rem 1rem;
+  max-width: 100%; /* stay within container */
 }
 .confirmText {
-  margin: 0 0 0.5rem 0;
+  margin: 0; /* gap handles spacing */
   color: #5c0a11;
+  overflow-wrap: anywhere; /* don’t force horizontal scroll */
 }
+.confirmText code {
+  overflow-wrap: anywhere;
+}
+
+/* Input: 1.125rem text and comfy tap target */
 .input {
   width: 100%;
   padding: 0.6rem 0.7rem;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  margin-bottom: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  min-height: var(--tap);
+  font-size: 1.125rem;
+  background: #fff;
 }
+.input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+/* Buttons row */
 .confirmRow {
   display: flex;
   gap: 0.5rem;
   justify-content: flex-end;
+  flex-wrap: wrap; /* allow wrapping at mid widths */
 }
+
+/* Base button (compose with variants) */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 0.9rem;
+  font-size: 1.125rem; /* your chosen size */
+  line-height: 1.2; /* looks good when wrapping to two lines */
+  min-height: var(--tap);
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-weight: 600;
+  white-space: normal; /* allow label to wrap instead of overflow */
+  text-align: center;
+  max-width: 100%;
+}
+.btn:focus-visible {
+  outline: 2px solid #80bfff;
+  outline-offset: 2px;
+}
+
+/* Share the row; stay inside container */
+.confirmRow .btn {
+  width: auto;
+  min-width: 0;
+  flex: 1 1 calc(50% - 0.25rem); /* two-up with gap */
+}
+.confirmRow .btn:only-child {
+  flex-basis: 100%;
+} /* single → full width */
+
+/* Variants */
 .secondaryBtn {
   background: #f8f9fa;
-  border: 1px solid #ced4da;
+  border-color: #ced4da;
   color: #333;
-  padding: 0.6rem 0.9rem;
-  min-height: 44px;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
 }
 .secondaryBtn:hover {
   background: #e9ecef;
 }
+
 .dangerBtn {
   background: #dc3545;
-  border: 1px solid #dc3545;
+  border-color: #dc3545;
   color: #fff;
-  padding: 0.6rem 0.9rem;
-  min-height: 44px;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
 }
 .dangerBtn:hover {
   background: #b02a37;
 }
 
+/* ========== Misc ========== */
 .bottomNav {
   margin-top: 2rem;
 }
-
 .center {
   text-align: center;
 }
@@ -135,23 +187,13 @@
   color: #555;
   text-align: center;
 }
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.6rem 0.9rem;
-  font-size: clamp(1rem, 1.8vw, 1.1rem);
-  line-height: 1;
-  min-height: 44px;
-  border-radius: 8px;
-  border: 1px solid transparent;
-  cursor: pointer;
-  font-weight: 600;
-  white-space: nowrap;
-}
 
+/* ========== Responsive ========== */
 @media (max-width: 520px) {
   .row {
     grid-template-columns: 1fr;
-  }
+  } /* stack label/value */
+  .confirmRow .btn {
+    flex: 1 1 100%;
+  } /* stack action buttons */
 }
