@@ -1,58 +1,72 @@
-/* centered single link row */
+/* ===== Centered single-link row ===== */
 .linkRow {
   text-align: center;
   margin-top: 0.75rem;
 }
 
-.link {
-  color: #007bff;
-  text-decoration: none;
-  font-weight: 600;
-}
-.link:hover,
-.link:focus {
-  text-decoration: underline;
-}
-
-/* split row (left + right) */
-.splitRow {
-  display: flex;
-  justify-content: space-between; /* wide screens: push to edges */
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
-  flex-wrap: wrap; /* allow wrapping if needed at mid sizes */
-  width: 100%;
-}
-
+/* Shared link styles (centered + split) */
+.link,
 .splitItem a {
   color: #007bff;
   text-decoration: none;
   font-weight: 600;
-  white-space: nowrap; /* keep each link on one line for wide screens */
-  font-size: clamp(0.95rem, 2.8vw, 1rem);
+  font-size: 1rem;
+  text-underline-offset: 2px;
 }
+.link:hover,
+.link:focus,
 .splitItem a:hover,
 .splitItem a:focus {
   text-decoration: underline;
 }
+.link:focus-visible,
+.splitItem a:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
+}
 
-/* ===== Responsive behavior =====
-   ≤320px: center & stack vertically, allow wrapping to avoid overflow */
-@media (max-width: 320px) {
+/* ===== Split row (left + right) ===== */
+.splitRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  flex-wrap: nowrap; /* prefer side-by-side */
+  min-width: 0; /* allow children to shrink */
+  width: 100%;
+}
+
+.splitItem {
+  flex: 0 1 auto; /* size to content, allow shrink */
+  min-width: 0; /* prevent overflow */
+}
+
+/* Extra containment for split links */
+.splitItem a {
+  display: inline-block;
+  white-space: nowrap; /* keep on one line at normal sizes */
+  max-width: 100%;
+  overflow: hidden; /* avoid pushing layout */
+  text-overflow: ellipsis;
+}
+
+/* ===== Tiny screens: stack & allow wrapping ===== */
+@media (max-width: 360px) {
   .splitRow {
     flex-direction: column;
     justify-content: center;
     align-items: center;
     gap: 0.35rem;
+    flex-wrap: wrap;
   }
-
   .splitItem {
     width: 100%;
     text-align: center;
   }
-
   .splitItem a {
-    white-space: normal; /* let "Forgot password?" wrap if needed */
+    white-space: normal; /* allow wrap */
+    overflow: visible;
+    text-overflow: unset;
   }
 }

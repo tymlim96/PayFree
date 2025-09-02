@@ -138,7 +138,7 @@
 }
 .helper {
   margin-top: 0.5rem;
-  font-size: 0.85rem;
+  font-size: 1rem;
   color: #6b7280;
   text-align: left; /* override global p center */
 }
@@ -379,7 +379,7 @@
 
 /* ===== Nav & states ===== */
 .bottomNav {
-  margin-top: 3rem;
+  margin-top: 2rem;
 }
 
 .error {
