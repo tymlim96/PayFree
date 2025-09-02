@@ -17,21 +17,42 @@
 /* split row (left + right) */
 .splitRow {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; /* wide screens: push to edges */
   align-items: center;
   gap: 0.5rem;
   margin-top: 0.75rem;
-  flex-wrap: nowrap; /* keep on one line */
+  flex-wrap: wrap; /* allow wrapping if needed at mid sizes */
+  width: 100%;
 }
 
 .splitItem a {
   color: #007bff;
   text-decoration: none;
   font-weight: 600;
-  white-space: nowrap; /* avoid wrapping each link */
+  white-space: nowrap; /* keep each link on one line for wide screens */
   font-size: clamp(0.95rem, 2.8vw, 1rem);
 }
 .splitItem a:hover,
 .splitItem a:focus {
   text-decoration: underline;
+}
+
+/* ===== Responsive behavior =====
+   ≤300px: center & stack vertically, allow wrapping to avoid overflow */
+@media (max-width: 300px) {
+  .splitRow {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .splitItem {
+    width: 100%;
+    text-align: center;
+  }
+
+  .splitItem a {
+    white-space: normal; /* let "Forgot password?" wrap if needed */
+  }
 }
