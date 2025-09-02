@@ -93,6 +93,24 @@
   background: #e9ecef;
 }
 
+/* Disabled states so the button looks truly disabled */
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.dangerBtn:disabled {
+  background: #f1aeb5; /* muted red */
+  border-color: #f1aeb5;
+  color: #fff;
+}
+
+.secondaryBtn:disabled {
+  background: #f1f3f5;
+  border-color: #dee2e6;
+  color: #888;
+}
+
 /* full-width utility for destructive primary action */
 .fullWidth {
   width: 100%;

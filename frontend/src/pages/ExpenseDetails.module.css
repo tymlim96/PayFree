@@ -172,6 +172,25 @@
   background: #b02a37;
 }
 
+/* Disabled buttons look truly disabled */
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  /* pointer-events: none; */
+}
+
+.dangerBtn:disabled {
+  background: #f1aeb5; /* muted red */
+  border-color: #f1aeb5;
+  color: #fff;
+}
+
+.secondaryBtn:disabled {
+  background: #f1f3f5;
+  border-color: #dee2e6;
+  color: #888;
+}
+
 /* ========== Misc ========== */
 .bottomNav {
   margin-top: 2rem;

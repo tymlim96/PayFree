@@ -19,6 +19,7 @@ export default function PaySettlement() {
   const [submitting, setSubmitting] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [confirmText, setConfirmText] = useState("");
+  const confirmMatched = confirmText.trim().toLowerCase() === "confirm";
   const cpIdNum = useMemo(() => Number(counterpartyId), [counterpartyId]);
 
   useEffect(() => {
@@ -186,16 +187,15 @@ export default function PaySettlement() {
                     setConfirming(false);
                     setConfirmText("");
                   }}
+                  disabled={submitting}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   className={`${styles.btn} ${styles.payBtn}`}
-                  disabled={confirmText !== "confirm" || submitting}
-                  title={
-                    confirmText !== "confirm" ? "Type 'confirm' to enable" : ""
-                  }
+                  disabled={!confirmMatched || submitting}
+                  title={!confirmMatched ? "Type 'confirm' to enable" : ""}
                 >
                   {submitting ? "Paying…" : "Confirm Pay"}
                 </button>

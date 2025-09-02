@@ -14,6 +14,7 @@ export default function ExpenseDetails() {
   const [expense, setExpense] = useState(null); // { ...expense fields, shares: [...] }
   const [deleting, setDeleting] = useState(false);
   const [confirmText, setConfirmText] = useState("");
+  const confirmMatched = confirmText.trim().toLowerCase() === "delete";
 
   useEffect(() => {
     (async () => {
@@ -33,7 +34,7 @@ export default function ExpenseDetails() {
   }, [tripId, expenseId]);
 
   const onDelete = async () => {
-    if (confirmText !== "delete") return;
+    if (!confirmMatched) return;
     try {
       setDeleting(true);
       const jwt = localStorage.getItem("token");
@@ -125,6 +126,7 @@ export default function ExpenseDetails() {
               type="button"
               className={`${styles.btn} ${styles.secondaryBtn}`}
               onClick={() => navigate(`/trips/${tripId}`)}
+              disabled={deleting}
             >
               Cancel
             </button>
@@ -132,6 +134,8 @@ export default function ExpenseDetails() {
               type="button"
               className={`${styles.btn} ${styles.dangerBtn}`}
               onClick={onDelete}
+              disabled={!confirmMatched || deleting}
+              title={!confirmMatched ? "Type 'delete' to enable" : ""}
             >
               Delete Expense
             </button>

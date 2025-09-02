@@ -41,7 +41,7 @@ export default function TripDetails() {
   const [showDelete, setShowDelete] = useState(false);
   const [confirmText, setConfirmText] = useState("");
   const [deleting, setDeleting] = useState(false);
-  const confirmMatched = confirmText === "delete";
+  const confirmMatched = confirmText.trim().toLowerCase() === "delete";
 
   // expenses state
   const [expenses, setExpenses] = useState([]);

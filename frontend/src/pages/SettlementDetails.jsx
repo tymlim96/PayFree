@@ -14,6 +14,7 @@ export default function SettlementDetails() {
   const [settlement, setSettlement] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [confirmText, setConfirmText] = useState("");
+  const confirmMatched = confirmText.trim().toLowerCase() === "delete";
 
   useEffect(() => {
     (async () => {
@@ -33,7 +34,7 @@ export default function SettlementDetails() {
   }, [tripId, settlementId]);
 
   const onDelete = async () => {
-    if (confirmText !== "delete") return;
+    if (!confirmMatched) return;
     try {
       setDeleting(true);
       const jwt = localStorage.getItem("token");
@@ -110,7 +111,8 @@ export default function SettlementDetails() {
               type="button"
               className={`${styles.btn} ${styles.dangerBtn}`}
               onClick={onDelete}
-              disabled={deleting}
+              disabled={!confirmMatched || deleting}
+              title={!confirmMatched ? "Type 'delete' to enable" : ""}
             >
               Delete Settlement
             </button>

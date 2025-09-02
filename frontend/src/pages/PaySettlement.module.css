@@ -114,6 +114,25 @@
   background: #e9ecef;
 }
 
+/* Make disabled states obvious */
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Match variants when disabled */
+.payBtn:disabled {
+  background: #d35400;
+  border-color: #d35400;
+  color: #fff;
+  opacity: 0.6;
+}
+.secondaryBtn:disabled {
+  background: #f0f1f2;
+  border-color: #d9dee2;
+  color: #777;
+}
+
 /* ========== Confirm block ========== */
 .confirmCard {
   border: 1px solid #ffe5e7;
