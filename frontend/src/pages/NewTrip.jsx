@@ -56,8 +56,8 @@ export default function NewTrip() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setMsg("Trip created! Share this invite link to add members:");
-      setStatus("success");
+      // setMsg("Trip created! Share this invite link to add members:");
+      // setStatus("success");
       setInviteUrl(res.data?.invite_url || "");
       setCreatedTripId(res.data?.trip?.id ?? null);
       setCopied(false);
