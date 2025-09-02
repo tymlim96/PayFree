@@ -296,6 +296,16 @@
   color: #6b7280;
 }
 
+/* make the whole settlement card clickable like expenses */
+.settlementLink {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+.settlementLink:hover .settlementCard {
+  background: #f3f4f6;
+}
+
 /* ===== Delete confirm block ===== */
 .deleteSection {
   margin-top: 1.25rem;

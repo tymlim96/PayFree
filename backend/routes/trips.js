@@ -1170,4 +1170,107 @@ router.post("/:id/settlements", async (req, res) => {
   }
 });
 
+/*──────────────────────────────────────────────────────────────
+  GET /trips/:id/settlements/:settlementId
+  Fetch single settlement details (member-only)
+──────────────────────────────────────────────────────────────*/
+router.get("/:id/settlements/:settlementId", async (req, res) => {
+  const tripId = Number(req.params.id);
+  const settlementId = Number(req.params.settlementId);
+
+  if (!Number.isFinite(tripId) || !Number.isFinite(settlementId)) {
+    return res.status(400).json({ error: "Invalid ids" });
+  }
+
+  try {
+    // must be a member
+    const access = await pool.query(
+      `SELECT 1 FROM trip_members WHERE trip_id = $1 AND user_id = $2`,
+      [tripId, req.userId]
+    );
+    if (access.rowCount === 0) {
+      return res.status(403).json({ error: "No access" });
+    }
+
+    const q = await pool.query(
+      `
+      SELECT 
+        s.id,
+        s.trip_id,
+        s.from_user_id,
+        fu.full_name AS from_user_name,
+        s.to_user_id,
+        tu.full_name AS to_user_name,
+        s.amount_cents,
+        s.currency_code,
+        s.created_at
+      FROM settlements s
+      JOIN users fu ON fu.id = s.from_user_id
+      JOIN users tu ON tu.id = s.to_user_id
+      WHERE s.id = $1 AND s.trip_id = $2
+      `,
+      [settlementId, tripId]
+    );
+
+    if (q.rowCount === 0) {
+      return res.status(404).json({ error: "Settlement not found" });
+    }
+
+    return res.json({ settlement: q.rows[0] });
+  } catch (e) {
+    console.error("[TRIPS] SETTLEMENT DETAIL ERROR:", e);
+    return res.status(500).json({ error: "Failed to load settlement" });
+  }
+});
+
+/*──────────────────────────────────────────────────────────────
+  DELETE /trips/:id/settlements/:settlementId
+  Delete a settlement (member-only). Anyone in the trip can delete.
+──────────────────────────────────────────────────────────────*/
+router.delete("/:id/settlements/:settlementId", async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const tripId = Number(req.params.id);
+    const settlementId = Number(req.params.settlementId);
+
+    if (!Number.isFinite(tripId) || !Number.isFinite(settlementId)) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({ error: "Invalid ids" });
+    }
+
+    await client.query("BEGIN");
+
+    // must be a member
+    const access = await client.query(
+      `SELECT 1 FROM trip_members WHERE trip_id = $1 AND user_id = $2`,
+      [tripId, req.userId]
+    );
+    if (access.rowCount === 0) {
+      await client.query("ROLLBACK");
+      return res.status(403).json({ error: "No access" });
+    }
+
+    // ensure settlement belongs to this trip
+    const found = await client.query(
+      `SELECT id FROM settlements WHERE id = $1 AND trip_id = $2 FOR UPDATE`,
+      [settlementId, tripId]
+    );
+    if (found.rowCount === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Settlement not found" });
+    }
+
+    await client.query(`DELETE FROM settlements WHERE id = $1`, [settlementId]);
+
+    await client.query("COMMIT");
+    return res.status(204).send();
+  } catch (e) {
+    await client.query("ROLLBACK");
+    console.error("[TRIPS] DELETE SETTLEMENT ERROR:", e);
+    return res.status(500).json({ error: "Failed to delete settlement" });
+  } finally {
+    client.release();
+  }
+});
+
 export default router;

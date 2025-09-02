@@ -385,25 +385,31 @@ export default function TripDetails() {
           <ul className={styles.settlementsList}>
             {settlements.map((s) => (
               <li key={s.id} className={styles.settlementItem}>
-                <div className={styles.settlementCard}>
-                  <div className={styles.settlementRow}>
-                    <div className={styles.settlementParties}>
-                      <strong>
-                        {s.from_user_name || `User ${s.from_user_id}`}
-                      </strong>
-                      &nbsp;→&nbsp;
-                      <strong>
-                        {s.to_user_name || `User ${s.to_user_id}`}
-                      </strong>
+                <Link
+                  to={`/trips/${id}/settlements/${s.id}`}
+                  className={styles.settlementLink}
+                  title="View settlement details"
+                >
+                  <div className={styles.settlementCard}>
+                    <div className={styles.settlementRow}>
+                      <div className={styles.settlementParties}>
+                        <strong>
+                          {s.from_user_name || `User ${s.from_user_id}`}
+                        </strong>
+                        &nbsp;→&nbsp;
+                        <strong>
+                          {s.to_user_name || `User ${s.to_user_id}`}
+                        </strong>
+                      </div>
+                      <div className={styles.settlementAmt}>
+                        {(s.amount_cents / 100).toFixed(2)} {s.currency_code}
+                      </div>
                     </div>
-                    <div className={styles.settlementAmt}>
-                      {(s.amount_cents / 100).toFixed(2)} {s.currency_code}
+                    <div className={styles.settlementMeta}>
+                      {new Date(s.created_at).toLocaleString()}
                     </div>
                   </div>
-                  <div className={styles.settlementMeta}>
-                    {new Date(s.created_at).toLocaleString()}
-                  </div>
-                </div>
+                </Link>
               </li>
             ))}
           </ul>

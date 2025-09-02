@@ -25,6 +25,7 @@ import NewExpense from "./pages/NewExpense";
 import ExpenseDetails from "./pages/ExpenseDetails";
 import SettleDebts from "./pages/SettleDebts";
 import PaySettlement from "./pages/PaySettlement";
+import SettlementDetails from "./pages/SettlementDetails";
 import { PolicyProvider } from "./contexts/PolicyContext";
 import { useAuth } from "./contexts/AuthContext";
 
@@ -98,6 +99,10 @@ function MainApp() {
           <Route
             path="/trips/:id/settle/pay/:counterpartyId"
             element={<PaySettlement />}
+          />
+          <Route
+            path="/trips/:id/settlements/:settlementId"
+            element={<SettlementDetails />}
           />
           <Route path="/account" element={<Account />} />
           <Route path="/account/change-password" element={<ChangePassword />} />
