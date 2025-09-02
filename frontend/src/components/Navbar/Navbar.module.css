@@ -1,15 +1,17 @@
+/* ===== Bar ===== */
 .navbar {
+  position: relative; /* anchor the dropdown */
   display: flex;
-  flex-wrap: wrap; /* allow wrap on small screens */
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   gap: 0.5rem;
   padding: 1rem;
-  background: #007bff; /* bar color */
+  background: #007bff;
   color: #fff;
 }
 
-/* Brand */
+/* ===== Brand ===== */
 .brandLink {
   font-weight: 800;
   font-size: clamp(1.6rem, 3.2vw, 2.2rem);
@@ -24,16 +26,16 @@
   text-decoration: none;
 }
 
-/* Right-side actions (links + logout) */
+/* ===== Desktop actions ===== */
 .actions {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
 
-/* Nav links */
+/* Links (desktop) */
 .navLink {
-  display: inline-block; /* so padding applies nicely */
+  display: inline-block;
   font-size: clamp(1.2rem, 2.6vw, 1.5rem);
   padding: 0.6rem 0.95rem;
   color: #fff;
@@ -46,23 +48,21 @@
   text-decoration: underline;
 }
 .navLink:focus-visible {
-  outline: 2px solid #fff8e1; /* accessible focus ring */
+  outline: 2px solid #fff8e1;
   outline-offset: 2px;
 }
 
-/* Logout button: same font as links, slimmer width */
+/* Logout (desktop) */
 .logoutButton {
   font-size: clamp(1.2rem, 2.6vw, 1.5rem);
   font-weight: 700;
   padding: 0.35rem 0.6rem;
-  width: auto; /* wrap to text width */
-  flex: 0 0 auto;
+  min-height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   white-space: nowrap;
   line-height: 1.1;
-  min-height: 44px;
   background: #fff;
   color: #007bff;
   border: 1px solid #d6e4ff;
@@ -74,9 +74,9 @@
   outline-offset: 2px;
 }
 
-/* ---------- Hamburger ---------- */
+/* ===== Hamburger ===== */
 .hamburger {
-  display: none; /* shown only on small screens */
+  display: none; /* shown on small screens */
   position: relative;
   width: 40px;
   height: 40px;
@@ -111,8 +111,7 @@
 .hamburger span:nth-child(3) {
   top: 26px;
 }
-
-/* X animation when open */
+/* X */
 .hamburgerOpen span:nth-child(1) {
   top: 19px;
   transform: translateX(-50%) rotate(45deg);
@@ -125,49 +124,77 @@
   transform: translateX(-50%) rotate(-45deg);
 }
 
-/* ---------- Small-screen behavior (≤480px) ---------- */
+/* ===== Mobile (≤480px): floating dropdown instead of expanding bar ===== */
 @media (max-width: 480px) {
   .navbar {
     padding: 0.75rem;
   }
-
   .hamburger {
     display: inline-flex;
   }
 
-  /* collapse by default */
+  /* hide inline actions on mobile */
   .actions {
     display: none;
-    width: 100%;
-    flex-direction: column;
-    align-items: flex-end; /* right edge aligns everything */
-    gap: 0.6rem;
-    margin-top: 0.6rem;
   }
+
+  /* floating panel */
   .actionsOpen {
     display: flex;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 8px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+
+    background: #fff;
+    color: #111;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 0.25rem;
+    min-width: 180px;
+    max-width: 90vw;
+    box-shadow: 0 12px 28px rgba(16, 24, 40, 0.18);
+    z-index: 1000;
   }
 
-  /* compact, right-aligned links (not full width) */
-  .navLink {
-    width: auto;
-    align-self: flex-end;
-    text-align: right;
-    padding: 0.8rem 0.9rem;
+  /* links inside panel */
+  .actionsOpen .navLink {
+    color: #111;
+    background: transparent;
+    border-radius: 8px;
+    padding: 0.75rem 0.9rem;
     min-height: 44px;
-    /* optional: keep a decent hit area without stretching */
-    min-width: 8.5rem; /* remove if you prefer zero min width */
+    text-align: left;
+    white-space: nowrap;
+  }
+  .actionsOpen .navLink:hover,
+  .actionsOpen .navLink:focus {
+    background: #f3f4f6;
+    text-decoration: none;
+  }
+  .actionsOpen .navLink:focus-visible {
+    outline: 2px solid #93c5fd;
+    outline-offset: 2px;
   }
 
-  /* Logout remains compact on the right */
-  .logoutButton {
-    width: auto;
-    align-self: flex-end;
-    margin-top: 0.2rem;
+  /* logout in panel — left-aligned text (not centered) */
+  .actionsOpen .logoutButton {
+    width: 100%;
+    margin-top: 2px;
+    padding: 0.75rem 0.9rem;
+    min-height: 44px;
+    border-radius: 8px;
+    background: #fff;
+    color: #b02a37;
+    border: 1px solid #fee2e2;
+    justify-content: flex-start; /* ← left-align content */
+    text-align: left; /* ← left-align text */
   }
 }
 
-/* Tiny phones – slightly tighter padding */
+/* Tiny phones */
 @media (max-width: 380px) {
   .navLink,
   .logoutButton {
@@ -176,7 +203,7 @@
   }
 }
 
-/* Respect users who prefer less motion */
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .hamburger span {
     transition: none;
