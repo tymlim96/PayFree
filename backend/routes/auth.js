@@ -30,7 +30,7 @@ router.get("/google", (req, res) => {
     httpOnly: true,
     sameSite: "lax",
     maxAge: 10 * 60 * 1000,
-    secure: false, // set true in prod (HTTPS)
+    secure: process.env.NODE_ENV === "production",
   });
 
   const url = oauthClient.generateAuthUrl({

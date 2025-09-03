@@ -30,6 +30,7 @@ app.use("/auth", authRoutes);
 app.use("/trips", requireAuth, tripsRouter);
 
 const PORT = process.env.PORT || 5000;
+// Exposes this port to Frontend
 app.listen(PORT, () => {
   console.log(`[backend] listening on http://localhost:${PORT}`);
 });
