@@ -5,6 +5,8 @@ import axios from "axios";
 import styles from "./PaySettlement.module.css";
 import { LinkRow } from "../components/LinkRow";
 
+const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+
 export default function PaySettlement() {
   const { id: tripId, counterpartyId } = useParams();
   const navigate = useNavigate();
@@ -28,10 +30,9 @@ export default function PaySettlement() {
         setLoading(true);
         setErr("");
         const jwt = localStorage.getItem("token");
-        const res = await axios.get(
-          `http://localhost:5000/trips/${tripId}/ledger`,
-          { headers: { Authorization: `Bearer ${jwt}` } }
-        );
+        const res = await axios.get(`${API_BASE}/trips/${tripId}/ledger`, {
+          headers: { Authorization: `Bearer ${jwt}` },
+        });
         const data = res.data || {};
         setCurrency(data.currency_code || "");
         setDebts(Array.isArray(data.debts) ? data.debts : []);
@@ -97,7 +98,7 @@ export default function PaySettlement() {
       setErr("");
       const jwt = localStorage.getItem("token");
       await axios.post(
-        `http://localhost:5000/trips/${tripId}/settlements`,
+        `${API_BASE}/trips/${tripId}/settlements`,
         {
           to_user_id: cpIdNum,
           amount_cents: cents,

@@ -4,7 +4,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { LinkRow } from "../components/LinkRow";
 import styles from "./NewExpense.module.css";
-import formStyles from "./Form.module.css"; // <-- reuse shared form/input/button
+import formStyles from "./Form.module.css";
+
+const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
 
 function decodeJwtUserId(token) {
   try {
@@ -58,16 +60,14 @@ export default function NewExpense() {
     (async () => {
       try {
         const jwt = localStorage.getItem("token");
-        const tripRes = await axios.get(
-          `http://localhost:5000/trips/${tripId}`,
-          { headers: { Authorization: `Bearer ${jwt}` } }
-        );
+        const tripRes = await axios.get(`${API_BASE}/trips/${tripId}`, {
+          headers: { Authorization: `Bearer ${jwt}` },
+        });
         setTrip(tripRes.data.trip);
 
-        const memRes = await axios.get(
-          `http://localhost:5000/trips/${tripId}/members`,
-          { headers: { Authorization: `Bearer ${jwt}` } }
-        );
+        const memRes = await axios.get(`${API_BASE}/trips/${tripId}/members`, {
+          headers: { Authorization: `Bearer ${jwt}` },
+        });
         const mems = memRes.data?.members || [];
         setMembers(mems);
 
@@ -175,7 +175,7 @@ export default function NewExpense() {
         body.shares = shares;
       }
 
-      await axios.post(`http://localhost:5000/trips/${tripId}/expenses`, body, {
+      await axios.post(`${API_BASE}/trips/${tripId}/expenses`, body, {
         headers: { Authorization: `Bearer ${jwt}` },
       });
 

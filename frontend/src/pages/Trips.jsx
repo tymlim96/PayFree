@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import styles from "./Trips.module.css";
 
+const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+
 export default function Trips() {
   const navigate = useNavigate();
   const [trips, setTrips] = useState([]);
@@ -13,7 +15,7 @@ export default function Trips() {
     (async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get("http://localhost:5000/trips", {
+        const res = await axios.get(`${API_BASE}/trips`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setTrips(res.data.trips || []);

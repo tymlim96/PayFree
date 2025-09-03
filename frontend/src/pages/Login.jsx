@@ -6,6 +6,8 @@ import styles from "./Form.module.css";
 import Alert from "../components/Alert/Alert";
 import { LinkRowSplit } from "../components/LinkRow";
 
+const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,7 +29,7 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:5000/auth/login", {
+      const res = await axios.post(`${API_BASE}/auth/login`, {
         email,
         password,
       });
@@ -82,7 +84,7 @@ export default function Login() {
       <div className={styles.divider}>or</div>
 
       <a
-        href="http://localhost:5000/auth/google" // prod: https://api.payfree.live/auth/google
+        href={`${API_BASE}/auth/google`}
         className={styles.googleBtn}
         aria-label="Continue with Google"
       >

@@ -8,6 +8,8 @@ import { CURRENCIES } from "../constants/currencies";
 import tripStyles from "./NewTrip.module.css";
 import formStyles from "./Form.module.css";
 
+const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+
 export default function NewTrip() {
   const navigate = useNavigate();
 
@@ -51,7 +53,7 @@ export default function NewTrip() {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        "http://localhost:5000/trips",
+        `${API_BASE}/trips`,
         { name: trimmed, currency_code: currency },
         { headers: { Authorization: `Bearer ${token}` } }
       );

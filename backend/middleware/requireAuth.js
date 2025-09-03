@@ -1,6 +1,8 @@
 // backend/middleware/requireAuth.js
 import jwt from "jsonwebtoken";
 
+// Checks for JWT Login token
+// If pass, place the userId in req.userId
 export default function requireAuth(req, res, next) {
   const auth = req.headers.authorization;
   if (!auth || !auth.startsWith("Bearer ")) {

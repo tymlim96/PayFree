@@ -4,6 +4,8 @@ import axios from "axios";
 import styles from "./TripDetails.module.css";
 import { LinkRow } from "../components/LinkRow";
 
+const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+
 // Getting directly from token -> stores id
 // Check whether current user is owner (unlocks delete btn)
 function decodeJwtUserId(token) {
@@ -66,7 +68,7 @@ export default function TripDetails() {
     (async () => {
       try {
         const jwt = localStorage.getItem("token");
-        const res = await axios.get(`http://localhost:5000/trips/${id}`, {
+        const res = await axios.get(`${API_BASE}/trips/${id}`, {
           headers: { Authorization: `Bearer ${jwt}` },
         });
         setTrip(res.data.trip);
@@ -85,10 +87,9 @@ export default function TripDetails() {
         setLoadingExp(true);
         setExpErr("");
         const jwt = localStorage.getItem("token");
-        const res = await axios.get(
-          `http://localhost:5000/trips/${id}/expenses`,
-          { headers: { Authorization: `Bearer ${jwt}` } }
-        );
+        const res = await axios.get(`${API_BASE}/trips/${id}/expenses`, {
+          headers: { Authorization: `Bearer ${jwt}` },
+        });
         setExpenses(res.data?.expenses || []);
       } catch {
         setExpErr("Failed to load expenses");
@@ -105,10 +106,9 @@ export default function TripDetails() {
         setLoadingSetts(true);
         setSettsErr("");
         const jwt = localStorage.getItem("token");
-        const res = await axios.get(
-          `http://localhost:5000/trips/${id}/settlements`,
-          { headers: { Authorization: `Bearer ${jwt}` } }
-        );
+        const res = await axios.get(`${API_BASE}/trips/${id}/settlements`, {
+          headers: { Authorization: `Bearer ${jwt}` },
+        });
         setSettlements(
           Array.isArray(res.data?.settlements) ? res.data.settlements : []
         );
@@ -127,10 +127,9 @@ export default function TripDetails() {
         setLoadingBal(true);
         setBalErr("");
         const jwt = localStorage.getItem("token");
-        const res = await axios.get(
-          `http://localhost:5000/trips/${id}/my-balance`,
-          { headers: { Authorization: `Bearer ${jwt}` } }
-        );
+        const res = await axios.get(`${API_BASE}/trips/${id}/my-balance`, {
+          headers: { Authorization: `Bearer ${jwt}` },
+        });
         setBalance(res.data?.balance_cents ?? 0);
         setBalanceCcy(res.data?.currency_code ?? "");
       } catch {
@@ -147,7 +146,7 @@ export default function TripDetails() {
       setLoadingInvite(true);
       setInviteErr("");
       const jwt = localStorage.getItem("token");
-      const res = await axios.get(`http://localhost:5000/trips/${id}/invite`, {
+      const res = await axios.get(`${API_BASE}/trips/${id}/invite`, {
         headers: { Authorization: `Bearer ${jwt}` },
       });
       setInviteUrl(res.data?.invite_url || "");
@@ -172,7 +171,7 @@ export default function TripDetails() {
     try {
       setDeleting(true);
       const jwt = localStorage.getItem("token");
-      await axios.delete(`http://localhost:5000/trips/${id}`, {
+      await axios.delete(`${API_BASE}/trips/${id}`, {
         headers: { Authorization: `Bearer ${jwt}` },
       });
       navigate("/trips", { replace: true });

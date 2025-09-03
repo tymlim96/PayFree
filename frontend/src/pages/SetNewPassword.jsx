@@ -6,6 +6,8 @@ import { LinkRow } from "../components/LinkRow";
 import { usePolicy } from "../contexts/PolicyContext";
 import styles from "./Form.module.css";
 
+const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+
 export default function SetNewPassword() {
   const { minPasswordLen } = usePolicy();
   const { token } = useParams();
@@ -25,7 +27,7 @@ export default function SetNewPassword() {
     let mounted = true;
     (async () => {
       try {
-        await axios.get("http://localhost:5000/auth/reset-verify", {
+        await axios.get(`${API_BASE}/auth/reset-verify`, {
           params: { token },
         });
         if (!mounted) return;
@@ -63,7 +65,7 @@ export default function SetNewPassword() {
     }
 
     try {
-      await axios.post("http://localhost:5000/auth/reset", {
+      await axios.post(`${API_BASE}/auth/reset`, {
         token,
         newPassword,
       });

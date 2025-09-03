@@ -4,6 +4,8 @@ import Alert from "../components/Alert/Alert";
 import { LinkRow } from "../components/LinkRow";
 import styles from "./Form.module.css";
 
+const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+
 export default function ResetPasswordRequest() {
   const [email, setEmail] = useState("");
   const [msg, setMsg] = useState("");
@@ -16,7 +18,7 @@ export default function ResetPasswordRequest() {
     setMsg("");
     setStatus(null);
     try {
-      await axios.post("http://localhost:5000/auth/reset-request", { email });
+      await axios.post(`${API_BASE}/auth/reset-request`, { email });
       setMsg(
         "If this email exists, a password reset link has been sent. Please check your inbox."
       );

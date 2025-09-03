@@ -6,6 +6,8 @@ import Alert from "../components/Alert/Alert";
 import { LinkRow } from "../components/LinkRow";
 import { usePolicy } from "../contexts/PolicyContext";
 
+const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+
 export default function SignUp() {
   const { minPasswordLen } = usePolicy();
   const [fullName, setFullName] = useState("");
@@ -31,7 +33,7 @@ export default function SignUp() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:5000/auth/signup", {
+      const res = await axios.post(`${API_BASE}/auth/signup`, {
         email,
         password,
         fullName,

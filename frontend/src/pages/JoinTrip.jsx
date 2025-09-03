@@ -4,6 +4,8 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../contexts/AuthContext";
 
+const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+
 export default function JoinTrip() {
   const { token } = useParams();
   const navigate = useNavigate();
@@ -21,7 +23,7 @@ export default function JoinTrip() {
       try {
         const jwt = localStorage.getItem("token");
         const res = await axios.post(
-          `http://localhost:5000/trips/join/${token}`,
+          `${API_BASE}/trips/join/${token}`,
           {},
           { headers: { Authorization: `Bearer ${jwt}` } }
         );

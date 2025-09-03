@@ -27,15 +27,6 @@ function decodeExpMs(token) {
   }
 }
 
-// function decodeExpMs(token) {
-//   try {
-//     const payload = JSON.parse(atob(token.split(".")[1]));
-//     return payload?.exp ? payload.exp * 1000 : null;
-//   } catch {
-//     return null;
-//   }
-// }
-
 export function AuthProvider({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(
     Boolean(localStorage.getItem("token"))

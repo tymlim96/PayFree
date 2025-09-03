@@ -5,6 +5,8 @@ import axios from "axios";
 import styles from "./ExpenseDetails.module.css";
 import { LinkRow } from "../components/LinkRow";
 
+const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+
 export default function ExpenseDetails() {
   const { id: tripId, expenseId } = useParams();
   const navigate = useNavigate();
@@ -21,7 +23,7 @@ export default function ExpenseDetails() {
       try {
         const jwt = localStorage.getItem("token");
         const res = await axios.get(
-          `http://localhost:5000/trips/${tripId}/expenses/${expenseId}`,
+          `${API_BASE}/trips/${tripId}/expenses/${expenseId}`,
           { headers: { Authorization: `Bearer ${jwt}` } }
         );
         setExpense(res.data.expense);
@@ -38,10 +40,9 @@ export default function ExpenseDetails() {
     try {
       setDeleting(true);
       const jwt = localStorage.getItem("token");
-      await axios.delete(
-        `http://localhost:5000/trips/${tripId}/expenses/${expenseId}`,
-        { headers: { Authorization: `Bearer ${jwt}` } }
-      );
+      await axios.delete(`${API_BASE}/trips/${tripId}/expenses/${expenseId}`, {
+        headers: { Authorization: `Bearer ${jwt}` },
+      });
       navigate(`/trips/${tripId}`, { replace: true });
     } catch (e) {
       setErr(e?.response?.data?.error || "Failed to delete expense");

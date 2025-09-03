@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "nodemon --ext js,mjs,cjs --watch . server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "NODE_ENV=production node server.js"
   },
   "keywords": [],
   "author": "",

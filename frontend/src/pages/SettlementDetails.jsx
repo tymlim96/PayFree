@@ -5,6 +5,8 @@ import axios from "axios";
 import styles from "./ExpenseDetails.module.css"; // reuse the same styles
 import { LinkRow } from "../components/LinkRow";
 
+const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+
 export default function SettlementDetails() {
   const { id: tripId, settlementId } = useParams();
   const navigate = useNavigate();
@@ -21,7 +23,7 @@ export default function SettlementDetails() {
       try {
         const jwt = localStorage.getItem("token");
         const res = await axios.get(
-          `http://localhost:5000/trips/${tripId}/settlements/${settlementId}`,
+          `${API_BASE}/trips/${tripId}/settlements/${settlementId}`,
           { headers: { Authorization: `Bearer ${jwt}` } }
         );
         setSettlement(res.data.settlement);
@@ -39,7 +41,7 @@ export default function SettlementDetails() {
       setDeleting(true);
       const jwt = localStorage.getItem("token");
       await axios.delete(
-        `http://localhost:5000/trips/${tripId}/settlements/${settlementId}`,
+        `${API_BASE}/trips/${tripId}/settlements/${settlementId}`,
         { headers: { Authorization: `Bearer ${jwt}` } }
       );
       navigate(`/trips/${tripId}`, { replace: true });

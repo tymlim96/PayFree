@@ -317,7 +317,7 @@ router.post("/reset-request", async (req, res) => {
     );
 
     const link = `${
-      process.env.APP_URL || "http://localhost:3000"
+      process.env.FRONTEND_URL || "http://localhost:3000"
     }/reset-password/${rawToken}`;
 
     const transporter = await getMailer();

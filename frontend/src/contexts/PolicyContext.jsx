@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
 
+const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
 const PolicyContext = createContext({
   minPasswordLen: 6,
   isPolicyLoading: true,
@@ -16,7 +17,7 @@ export function PolicyProvider({ children }) {
     let cancelled = false;
     (async () => {
       try {
-        const res = await axios.get("http://localhost:5000/auth/policy");
+        const res = await axios.get(`${API_BASE}/auth/policy`);
         if (cancelled) return;
         const n = Number(res.data?.minPasswordLen) || 6;
         setMinPasswordLen(n);

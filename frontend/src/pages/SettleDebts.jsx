@@ -5,6 +5,8 @@ import axios from "axios";
 import styles from "./SettleDebts.module.css";
 import { LinkRow } from "../components/LinkRow";
 
+const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+
 export default function SettleDebts() {
   const { id: tripId } = useParams();
   const navigate = useNavigate();
@@ -21,12 +23,9 @@ export default function SettleDebts() {
         setLoading(true);
         setErr("");
         const jwt = localStorage.getItem("token");
-        const res = await axios.get(
-          `http://localhost:5000/trips/${tripId}/ledger`,
-          {
-            headers: { Authorization: `Bearer ${jwt}` },
-          }
-        );
+        const res = await axios.get(`${API_BASE}/trips/${tripId}/ledger`, {
+          headers: { Authorization: `Bearer ${jwt}` },
+        });
 
         const data = res.data || {};
         setCurrency(data.currency_code || "");
