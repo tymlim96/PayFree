@@ -7,7 +7,10 @@ import authRoutes from "./routes/auth.js";
 import tripsRouter from "./routes/trips.js";
 import requireAuth from "./middleware/requireAuth.js";
 
-dotenv.config({ path: "../.env" });
+if (process.env.NODE_ENV !== "production") {
+  // Only used in dev. Docker-compose has env_file config.
+  dotenv.config({ path: "../.env" });
+}
 
 const app = express();
 

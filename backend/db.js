@@ -1,10 +1,13 @@
 // db.js
 import pkg from "pg";
+import dotenv from "dotenv";
+
 const { Pool } = pkg;
 
-// Pull in .env first
-import dotenv from "dotenv";
-dotenv.config({ path: "../.env" });
+if (process.env.NODE_ENV !== "production") {
+  // Only used in dev. Docker-compose has env_file config.
+  dotenv.config({ path: "../.env" });
+}
 
 const pool = new Pool({
   host: process.env.DB_HOST,
