@@ -4,7 +4,7 @@ const { Pool } = pkg;
 
 // Pull in .env first
 import dotenv from "dotenv";
-dotenv.config();
+dotenv.config({ path: "../.env" });
 
 const pool = new Pool({
   host: process.env.DB_HOST,

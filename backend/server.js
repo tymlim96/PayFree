@@ -7,7 +7,7 @@ import authRoutes from "./routes/auth.js";
 import tripsRouter from "./routes/trips.js";
 import requireAuth from "./middleware/requireAuth.js";
 
-dotenv.config();
+dotenv.config({ path: "../.env" });
 
 const app = express();
 
