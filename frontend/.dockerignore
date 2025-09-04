@@ -1,0 +1,12 @@
+.git
+.gitignore
+.env
+*.env
+node_modules
+build
+npm-debug.log*
+yarn-error.log*
+*.log
+coverage
+.vscode
+.DS_Store

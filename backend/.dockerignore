@@ -1,0 +1,20 @@
+# Don't send Git history
+.git
+.gitignore
+
+# Local env files & secrets
+.env
+*.env
+
+# Node modules (we install fresh in image)
+node_modules
+
+# Logs & caches
+npm-debug.log*
+yarn-error.log*
+*.log
+
+# Local dev artifacts
+coverage
+.vscode
+.DS_Store
