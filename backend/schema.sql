@@ -155,17 +155,17 @@ CREATE TABLE IF NOT EXISTS public.expenses (
 );
 
 -- Make sure payer & creator belong to the trip
-ALTER TABLE public.expenses
-  ADD CONSTRAINT expenses_payer_is_member_fk
-    FOREIGN KEY (trip_id, paid_by_user_id)
-    REFERENCES public.trip_members (trip_id, user_id)
-    ON DELETE RESTRICT;
+-- ALTER TABLE public.expenses
+--   ADD CONSTRAINT expenses_payer_is_member_fk
+--     FOREIGN KEY (trip_id, paid_by_user_id)
+--     REFERENCES public.trip_members (trip_id, user_id)
+--     ON DELETE RESTRICT;
 
-ALTER TABLE public.expenses
-  ADD CONSTRAINT expenses_creator_is_member_fk
-    FOREIGN KEY (trip_id, created_by)
-    REFERENCES public.trip_members (trip_id, user_id)
-    ON DELETE RESTRICT;
+-- ALTER TABLE public.expenses
+--   ADD CONSTRAINT expenses_creator_is_member_fk
+--     FOREIGN KEY (trip_id, created_by)
+--     REFERENCES public.trip_members (trip_id, user_id)
+--     ON DELETE RESTRICT;
 
 -- Indexes
 -- List/search by trip fast, keep good ORDER BY created_at performance
@@ -263,23 +263,23 @@ CREATE TABLE IF NOT EXISTS public.settlements (
 );
 
 -- Ensure all involved users are members of the trip
-ALTER TABLE public.settlements
-  ADD CONSTRAINT settlements_from_is_member_fk
-    FOREIGN KEY (trip_id, from_user_id)
-    REFERENCES public.trip_members (trip_id, user_id)
-    ON DELETE RESTRICT;
+-- ALTER TABLE public.settlements
+--   ADD CONSTRAINT settlements_from_is_member_fk
+--     FOREIGN KEY (trip_id, from_user_id)
+--     REFERENCES public.trip_members (trip_id, user_id)
+--     ON DELETE RESTRICT;
 
-ALTER TABLE public.settlements
-  ADD CONSTRAINT settlements_to_is_member_fk
-    FOREIGN KEY (trip_id, to_user_id)
-    REFERENCES public.trip_members (trip_id, user_id)
-    ON DELETE RESTRICT;
+-- ALTER TABLE public.settlements
+--   ADD CONSTRAINT settlements_to_is_member_fk
+--     FOREIGN KEY (trip_id, to_user_id)
+--     REFERENCES public.trip_members (trip_id, user_id)
+--     ON DELETE RESTRICT;
 
-ALTER TABLE public.settlements
-  ADD CONSTRAINT settlements_creator_is_member_fk
-    FOREIGN KEY (trip_id, created_by)
-    REFERENCES public.trip_members (trip_id, user_id)
-    ON DELETE RESTRICT;
+-- ALTER TABLE public.settlements
+--   ADD CONSTRAINT settlements_creator_is_member_fk
+--     FOREIGN KEY (trip_id, created_by)
+--     REFERENCES public.trip_members (trip_id, user_id)
+--     ON DELETE RESTRICT;
 
 -- Indexes
 CREATE INDEX IF NOT EXISTS settlements_from_idx ON public.settlements (from_user_id);
