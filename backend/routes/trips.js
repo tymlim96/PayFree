@@ -260,6 +260,59 @@ router.delete("/:id", async (req, res) => {
 });
 
 /*──────────────────────────────────────────────────────────────
+  POST /trips/:id/leave  → current user leaves the trip (non-owner only)
+  Removes the caller from trip_members but keeps all their past expenses/shares.
+──────────────────────────────────────────────────────────────*/
+router.post("/:id/leave", async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const { id: tripId } = req.params;
+
+    await client.query("BEGIN");
+
+    // Must be a member
+    const mem = await client.query(
+      `SELECT role FROM trip_members WHERE trip_id = $1 AND user_id = $2 FOR UPDATE`,
+      [tripId, req.userId]
+    );
+    if (mem.rowCount === 0) {
+      await client.query("ROLLBACK");
+      return res.status(403).json({ error: "No access (not a member)" });
+    }
+
+    // Trip owner cannot leave via this route
+    const t = await client.query(`SELECT owner_id FROM trips WHERE id = $1`, [
+      tripId,
+    ]);
+    if (t.rowCount === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Trip not found" });
+    }
+    if (t.rows[0].owner_id === req.userId) {
+      await client.query("ROLLBACK");
+      return res.status(403).json({
+        error: "Owner cannot leave. Can only delete trip.",
+      });
+    }
+
+    // Remove membership
+    await client.query(
+      `DELETE FROM trip_members WHERE trip_id = $1 AND user_id = $2`,
+      [tripId, req.userId]
+    );
+
+    await client.query("COMMIT");
+    return res.status(200).json({ left: true });
+  } catch (err) {
+    await client.query("ROLLBACK");
+    console.error("[TRIPS] LEAVE TRIP ERROR:", err);
+    return res.status(500).json({ error: "Failed to leave trip" });
+  } finally {
+    client.release();
+  }
+});
+
+/*──────────────────────────────────────────────────────────────
   GET /trips/:id/members
   List members of a trip (member-only)
 ──────────────────────────────────────────────────────────────*/

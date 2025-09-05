@@ -395,6 +395,26 @@
   }
 }
 
+/* Leave trip section mirrors delete block spacing */
+.leaveSection {
+  margin-top: 1.25rem;
+}
+/* Warning/amber button for "Leave" */
+.warningBtn {
+  background: #d97706; /* amber-600 */
+  border-color: #d97706;
+  color: #fff;
+}
+.warningBtn:hover {
+  background: #b45309; /* amber-700 */
+  border-color: #b45309;
+}
+.warningBtn:disabled {
+  background: #f5a623; /* muted amber */
+  border-color: #f5a623;
+  color: #fff;
+}
+
 /* ===== Nav & states ===== */
 .bottomNav {
   margin-top: 2rem;

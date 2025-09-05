@@ -33,6 +33,7 @@ export default function TripDetails() {
 
   const [showMeta, setShowMeta] = useState(false);
 
+  // Invite link
   const [showInvite, setShowInvite] = useState(false);
   const [inviteUrl, setInviteUrl] = useState("");
   const [inviteErr, setInviteErr] = useState("");
@@ -40,22 +41,29 @@ export default function TripDetails() {
   const [copied, setCopied] = useState(false);
   const copyBtnRef = useRef(null);
 
+  // Delete link
   const [showDelete, setShowDelete] = useState(false);
   const [confirmText, setConfirmText] = useState("");
   const [deleting, setDeleting] = useState(false);
   const confirmMatched = confirmText.trim().toLowerCase() === "delete";
 
-  // expenses state
+  // Leave trip state
+  const [showLeave, setShowLeave] = useState(false);
+  const [leaveText, setLeaveText] = useState("");
+  const [leaving, setLeaving] = useState(false);
+  const leaveMatched = leaveText.trim().toLowerCase() === "confirm";
+
+  // Expenses state
   const [expenses, setExpenses] = useState([]);
   const [loadingExp, setLoadingExp] = useState(true);
   const [expErr, setExpErr] = useState("");
 
-  // settlements state
+  // Settlements state
   const [settlements, setSettlements] = useState([]);
   const [loadingSetts, setLoadingSetts] = useState(true);
   const [settsErr, setSettsErr] = useState("");
 
-  // balance state
+  // Balance state
   const [balance, setBalance] = useState(null); // in cents
   const [balanceCcy, setBalanceCcy] = useState("");
   const [loadingBal, setLoadingBal] = useState(true);
@@ -64,6 +72,7 @@ export default function TripDetails() {
   const token = localStorage.getItem("token");
   const authedUserId = token ? decodeJwtUserId(token) : null;
 
+  // Get trip
   useEffect(() => {
     (async () => {
       try {
@@ -181,6 +190,25 @@ export default function TripDetails() {
           "Failed to delete trip. You may not be the owner."
       );
       setDeleting(false);
+    }
+  };
+
+  // Leave trip handler
+  const onLeave = async () => {
+    if (!leaveMatched) return;
+    try {
+      setLeaving(true);
+      const jwt = localStorage.getItem("token");
+      // Adjust the route/method if your backend differs:
+      await axios.post(
+        `${API_BASE}/trips/${id}/leave`,
+        {},
+        { headers: { Authorization: `Bearer ${jwt}` } }
+      );
+      navigate("/trips", { replace: true });
+    } catch (e) {
+      setErr(e?.response?.data?.error || "Failed to leave trip");
+      setLeaving(false);
     }
   };
 
@@ -460,6 +488,60 @@ export default function TripDetails() {
                   title={!confirmMatched ? "Type 'delete' to enable" : ""}
                 >
                   {deleting ? "Deleting…" : "Confirm Delete"}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Leave trip (non-owner only) */}
+      {!isOwner && (
+        <div className={styles.leaveSection}>
+          {!showLeave ? (
+            <button
+              type="button"
+              className={`${styles.btn} ${styles.warningBtn} ${styles.fullWidth}`}
+              onClick={() => setShowLeave(true)}
+              title="Leave this trip"
+            >
+              Leave Trip
+            </button>
+          ) : (
+            <div className={styles.confirmCard}>
+              <p className={styles.confirmText}>
+                You will be removed from this trip. Make sure to settle any
+                expenses with members before leaving. Type <code>confirm</code>{" "}
+                to leave.
+              </p>
+
+              <input
+                className={styles.input}
+                placeholder="confirm"
+                value={leaveText}
+                onChange={(e) => setLeaveText(e.target.value)}
+                disabled={leaving}
+              />
+
+              <div className={styles.confirmRow}>
+                <button
+                  className={`${styles.btn} ${styles.secondaryBtn}`}
+                  onClick={() => {
+                    setShowLeave(false);
+                    setLeaveText("");
+                  }}
+                  disabled={leaving}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  className={`${styles.btn} ${styles.warningBtn}`}
+                  onClick={onLeave}
+                  disabled={!leaveMatched || leaving}
+                  title={!leaveMatched ? "Type 'confirm' to enable" : ""}
+                >
+                  {leaving ? "Leaving…" : "Confirm Leave"}
                 </button>
               </div>
             </div>
