@@ -15,6 +15,12 @@ export default function Login() {
   const [status, setStatus] = useState(null); // "success" | "error" | null
 
   const location = useLocation();
+  // Where to land after login?
+  const fromLoc = location.state?.from;
+  const dest =
+    (fromLoc?.pathname ? fromLoc.pathname + (fromLoc.search || "") : null) ||
+    "/trips";
+
   const [flashMsg, setFlashMsg] = useState(location.state?.msg || "");
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -36,7 +42,7 @@ export default function Login() {
       await login(res.data.token);
       setMsg("Logged in successfully");
       setStatus("success");
-      navigate("/trips");
+      navigate(dest, { replace: true });
     } catch (err) {
       setMsg(err.response?.data?.error || "Login failed");
       setStatus("error");
@@ -84,7 +90,7 @@ export default function Login() {
       <div className={styles.divider}>or</div>
 
       <a
-        href={`${API_BASE}/auth/google`}
+        href={`${API_BASE}/auth/google?from=${encodeURIComponent(dest)}`}
         className={styles.googleBtn}
         aria-label="Continue with Google"
       >

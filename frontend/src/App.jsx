@@ -43,26 +43,16 @@ function App() {
 function RequireAuth() {
   const { isLoggedIn } = useAuth();
   const location = useLocation();
-  if (!isLoggedIn) {
+  if (!isLoggedIn)
     return <Navigate to="/login" state={{ from: location }} replace />;
-  }
   return <Outlet />;
 }
 
 /** Redirect logged-in users away from /login & /signup (but honor ?from) */
 function RedirectIfAuthed() {
   const { isLoggedIn } = useAuth();
-  const location = useLocation();
-
   if (!isLoggedIn) return <Outlet />;
-
-  // Prefer the "from" location we stashed when we sent the user to /login
-  const fromLoc = location.state?.from;
-  const dest =
-    (fromLoc?.pathname ? fromLoc.pathname + (fromLoc.search || "") : null) ||
-    "/trips";
-
-  return <Navigate to={dest} replace />;
+  return <Navigate to="/trips" replace />;
 }
 
 function MainApp() {
@@ -79,11 +69,11 @@ function MainApp() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/reset-password" element={<ResetPasswordRequest />} />
           <Route path="/reset-password/:token" element={<SetNewPassword />} />
-          <Route path="/oauth-callback" element={<OAuthCallback />} />
         </Route>
 
-        {/* Public route that self-redirects to login if needed */}
+        {/* Public routes */}
         <Route path="/join/:token" element={<JoinTrip />} />
+        <Route path="/oauth-callback" element={<OAuthCallback />} />
 
         {/* Private pages */}
         <Route element={<RequireAuth />}>

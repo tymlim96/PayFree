@@ -11,6 +11,7 @@ export default function OAuthCallback() {
   useEffect(() => {
     const params = new URLSearchParams(search);
     const token = params.get("token");
+    const returnTo = params.get("return_to");
 
     const finish = async () => {
       if (!token) {
@@ -19,7 +20,11 @@ export default function OAuthCallback() {
       }
       try {
         await login(token); // stores token, fetches /auth/me
-        navigate("/trips", { replace: true });
+        const dest =
+          returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//")
+            ? returnTo
+            : "/trips";
+        navigate(dest, { replace: true });
       } catch {
         navigate("/login", { replace: true, state: { msg: "OAuth failed" } });
       }

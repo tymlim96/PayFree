@@ -33,6 +33,17 @@ router.get("/google", (req, res) => {
     secure: process.env.NODE_ENV === "production",
   });
 
+  // Capture desired post-login destination (safe, relative only)
+  const rawFrom = typeof req.query.from === "string" ? req.query.from : "";
+  const safeFrom =
+    rawFrom.startsWith("/") && !rawFrom.startsWith("//") ? rawFrom : "/trips";
+  res.cookie("oauth_return_to", safeFrom, {
+    httpOnly: true, // only server reads it
+    sameSite: "lax",
+    maxAge: 10 * 60 * 1000,
+    secure: process.env.NODE_ENV === "production",
+  });
+
   const url = oauthClient.generateAuthUrl({
     access_type: "offline",
     prompt: "select_account",
@@ -50,6 +61,7 @@ router.get("/google", (req, res) => {
 router.get("/google/callback", async (req, res) => {
   const { code, state } = req.query;
   const stateCookie = req.cookies?.oauth_state;
+  const returnToCookie = req.cookies?.oauth_return_to;
   const FRONTEND = process.env.FRONTEND_URL || "http://localhost:3000";
 
   try {
@@ -57,6 +69,7 @@ router.get("/google/callback", async (req, res) => {
       return res.redirect(`${FRONTEND}/login?error=oauth_state`);
     }
     res.clearCookie("oauth_state");
+    if (returnToCookie) res.clearCookie("oauth_return_to");
 
     const { tokens } = await oauthClient.getToken(String(code));
     const idToken = tokens.id_token;
@@ -101,10 +114,15 @@ router.get("/google/callback", async (req, res) => {
       expiresIn: "1h",
     });
 
-    const redirectUrl = new URL(
-      `${process.env.FRONTEND_URL || "http://localhost:3000"}/oauth-callback`
-    );
+    const redirectUrl = new URL(`${FRONTEND}/oauth-callback`);
     redirectUrl.searchParams.set("token", token);
+    if (
+      typeof returnToCookie === "string" &&
+      returnToCookie.startsWith("/") &&
+      !returnToCookie.startsWith("//")
+    ) {
+      redirectUrl.searchParams.set("return_to", returnToCookie);
+    }
     return res.redirect(redirectUrl.toString());
   } catch (err) {
     console.error("Google OAuth error:", err);
