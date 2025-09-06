@@ -1,6 +1,7 @@
 # PayFree
 
 PayFree web application link: https://payfree.live
+
 YouTube instructions on using the web application: https://youtu.be/qN7n4XTbbWM
 
 PayFree is a full-stack web application for **tracking shared holiday expenses** among friends.  
